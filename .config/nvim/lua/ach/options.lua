@@ -32,15 +32,22 @@ local options = {
     cursorline = true,                       -- highlight the current line
     number = true,                           -- set numbered lines
     relativenumber = true,                  -- set relative numbered lines
-    numberwidth = 4,                         -- set number column width to 2 {default 4}
+    numberwidth = 3,                         -- set number column width to 2 {default 4}
+    foldcolumn = "1",
+    foldlevel = 99, -- Using ufo provider need a large value, feel free to decrease the value
+    foldlevelstart = 99,
+    foldenable = true,
     signcolumn = "yes",                      -- always show the sign column, otherwise it would shift the text each time
     wrap = false,                            -- display lines as one long line
     scrolloff = 5,                           -- is one of my fav
     sidescrolloff = 5,
     guifont = "monospace:h17",               -- the font used in graphical neovim applications
     autoindent = true ,
-
-
+    autochdir = true,
+    --[[ winbar = '%f', ]]
+    compatible = false,
+    --[[ iskeyword = '-', ]]
+    whichwrap = "<,>,[,],h,l",
 }
 
 vim.opt.shortmess:append "c"
@@ -48,7 +55,10 @@ for option_name, options_value in pairs(options) do
     vim.opt[option_name] = options_value
 end
 
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
 -- vim.cmd "set whichwrap+=<,>,[,],h,l"
-vim.cmd("set nowritebackup")
-vim.cmd("set nocompatible")
+--[[ vim.cmd("set nowritebackup") ]]
+--[[ vim.cmd("set nocompatible") ]]
 -- vim.cmd [[set iskeyword+=-]]

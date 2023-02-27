@@ -3,11 +3,10 @@ if not status_ok then
     return
 end
 
-
 --- treesitter-context at the bottom
-
 configs.setup {
-    ensure_installed = "all", -- one of "all", "maintained" (parsers with maintainers), or a list of languages
+    ensure_installed = {"python","lua","elixir","javascript","typescript","nix","c","bash","rust",
+    "cpp","help","markdown","markdown_inline","html","css","comment"}, -- one of "all", "maintained" (parsers with maintainers), or a list of languages
     sync_install = true, -- install languages synchronously (only applied to `ensure_installed`)
     ignore_install = { "" }, -- List of parsers to ignore installing
     autotag = {

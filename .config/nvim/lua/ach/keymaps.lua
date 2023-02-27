@@ -12,8 +12,6 @@ local keymap = vim.api.nvim_set_keymap
 
 --Remap space as leader key
 keymap("", "<Space>", "<Nop>", opts)
-vim.g.mapleader = " "
-vim.g.maplocalleader = " "
 
 -- Modes
 --   normal_mode = "n",
@@ -25,10 +23,10 @@ vim.g.maplocalleader = " "
 
 -- Normal --
 -- Better window navigation
-keymap("n", "<C-h>", "<C-w>h", opts)
-keymap("n", "<C-j>", "<C-w>j", opts)
-keymap("n", "<C-k>", "<C-w>k", opts)
-keymap("n", "<C-l>", "<C-w>l", opts)
+--[[ keymap("n", "<C-h>", "<C-w>h", opts) ]]
+--[[ keymap("n", "<C-j>", "<C-w>j", opts) ]]
+--[[ keymap("n", "<C-k>", "<C-w>k", opts) ]]
+--[[ keymap("n", "<C-l>", "<C-w>l", opts) ]]
 
 -- Resize with arrows
 keymap("n", "<C-Up>", ":resize +2<CR>", opts)
@@ -36,12 +34,18 @@ keymap("n", "<C-Down>", ":resize -2<CR>", opts)
 keymap("n", "<C-Left>", ":vertical resize -2<CR>", opts)
 keymap("n", "<C-Right>", ":vertical resize +2<CR>", opts)
 
+-- split vertically and show the next buffer
+--[[ keymap("n", "<C-V>", ":vsplit ") ]]
+
+-- switch to zen mode
+keymap("n", "<leader>z",":ZenMode<CR>",opts)
+
 -- vim paste whate you yank not delete
 keymap("n", ",p", "\"0p", {})
 keymap("n", ",P", "\"0P", {})
 
 -- telescope abbr
-keymap("n", "tl", ":Telescope<CR>", opts)
+--[[ keymap("n", "tl", ":Telescope<CR>", opts) ]]
 
 -- lsp formatting
 keymap("n", "<leader>f", ":Format<CR>", opts)
@@ -52,12 +56,12 @@ keymap("n", "<A-j>", "<Esc>:m .+1<CR>==gi", opts)
 keymap("n", "<A-k>", "<Esc>:m .-2<CR>==gi", opts)
 
 -- Telescope
-keymap("n", "<leader>ff", "<cmd>Telescope find_files<CR>", opts)
-keymap("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", opts)
-keymap("n", "<leader>fb", "<cmd>Telescope buffers<CR>", opts)
-keymap("n", "<leader>fc", "<cmd>Telescope current_buffer_fuzzy_find<CR>", opts)
-keymap("n", "<leader>fs", "<cmd>Telescope grep_string<CR>", opts)
-keymap("n", "<leader>fo", "<cmd>Telescope oldfiles<CR>", opts)
+--[[ keymap("n", "<leader>ff", "<cmd>Telescope find_files<CR>", opts) ]]
+--[[ keymap("n", "<leader>fg", "<cmd>Telescope live_grep<CR>", opts) ]]
+--[[ keymap("n", "<leader>fb", "<cmd>Telescope buffers<CR>", opts) ]]
+--[[ keymap("n", "<leader>fc", "<cmd>Telescope current_buffer_fuzzy_find<CR>", opts) ]]
+--[[ keymap("n", "<leader>fs", "<cmd>Telescope grep_string<CR>", opts) ]]
+--[[ keymap("n", "<leader>fo", "<cmd>Telescope oldfiles<CR>", opts) ]]
 
 -- Bufferline
     -- cycling
@@ -74,13 +78,11 @@ keymap("n","g6",":BufferLineGoToBuffer 6<CR>", opts)
 keymap("n","<leader>bc",":BufferLinePickClose<CR>", opts)
     -- toggle pin buffer
 keymap("n","<leader>bp",":BufferLineTogglePin<CR>", opts)
--- buffers delete
-keymap("n", "<leader>bd", ":Bdelete<CR>", opts)
 keymap("n","<leader>br",":BufferLineCloseRight<CR>", opts)
 keymap("n","<leader>bl",":BufferLineCloseLeft<CR>", opts)
 
 -- Neo-tree
-keymap("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", opts)
+--[[ keymap("n", "<leader>e", "<cmd>NvimTreeToggle<CR>", opts) ]]
 -- Visual --
 --  Stay in indent mode
 keymap("v", "<", "<gv", opts)
@@ -109,3 +111,6 @@ keymap("t", "<C-l>", "<C-\\><C-N><C-w>l", term_opts)
 
 --Trouble--
 keymap("n","<leader>q","<cmd>TroubleToggle<CR>",opts)
+
+-- Knap
+-- set shorter name for keymap function
