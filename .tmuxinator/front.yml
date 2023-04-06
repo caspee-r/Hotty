@@ -1,7 +1,7 @@
 # /home/sammy/.tmuxinator/front.yml
 
 name: front
-root: ~/Projects/frontend
+root: ~/dev/frontend/css_learn
 
 # Optional tmux socket
 # socket_name: foo
@@ -12,7 +12,7 @@ root: ~/Projects/frontend
 # Project hooks
 
 # Runs on project start, always
-on_project_start: brave
+on_project_start: brave &
 
 # Run on project start, the first time
 # on_project_first_start: command
@@ -45,7 +45,7 @@ on_project_stop: pkill brave
 # attach: false
 
 windows:
-  - editor: nvim
+  - editor: nvim index.html styles.css
       # Synchronize all panes of this window, can be enabled before or after the pane commands run.
       # 'before' represents legacy functionality and will be deprecated in a future release, in favour of 'after'
       # synchronize: after

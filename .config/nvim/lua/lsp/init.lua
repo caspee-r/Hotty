@@ -20,8 +20,17 @@ local servers = {
 }
 
 require("mason").setup({
-	ensure_installed = servers,
+    ensure_installed = servers,
+    ui = {
+        keymaps = {
+            apply_language_filter = "<C-g>",
+        },
+    },
 })
+
+require("mason-lspconfig").setup {
+    ensure_installed = servers,
+}
 
 local M = require("lsp.handlers")
 

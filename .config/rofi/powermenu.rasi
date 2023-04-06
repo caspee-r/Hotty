@@ -28,7 +28,7 @@ window {
 	border:							0px 0px 0px 0px;
 	border-color:					@ac;
     border-radius:                  0px;
-	width:							500px;
+	width:							350px;
     location:                       center;
     x-offset:                       0;
     y-offset:                       0;
@@ -36,9 +36,17 @@ window {
 
 prompt {
     enabled: 						true;
+	padding: 						0px 0px 0px 10px;
+	background-color: 				@bga;
+	text-color: 					@fg;
+}
+
+textbox-prompt-colon {
 	padding: 						0px;
 	background-color: 				@bga;
 	text-color: 					@ac;
+	expand: false;
+	str: "";
 	font:							"feather 12";
 }
 
@@ -54,7 +62,7 @@ entry {
 }
 
 inputbar {
-	children: 						[ prompt, entry ];
+	children: 						[ textbox-prompt-colon, prompt ];
     background-color:               @bga;
     text-color:                     @fg;
     expand:                         false;
@@ -69,7 +77,7 @@ listview {
     background-color:               @al;
     padding:                        0px;
     columns:                        1;
-    lines:                          6;
+    lines:                          5;
     spacing:                        5px;
     cycle:                          true;
     dynamic:                        true;
@@ -91,7 +99,7 @@ element {
     text-color:                     @fg;
     orientation:                    horizontal;
     border-radius:                  0px;
-	padding: 						8px;
+	padding: 						8px 8px 8px -20px;
 }
 
 element-icon {

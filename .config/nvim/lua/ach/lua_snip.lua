@@ -1,6 +1,5 @@
 local ls = require("luasnip")
 
-require("luasnip.loaders.from_lua").load({path="~/.config/nvim/snippets"})
 
 ls.config.set_config({
     history=true,
@@ -15,3 +14,9 @@ ls.config.set_config({
     }
 
 })
+
+require("luasnip.loaders.from_lua").load({paths="~/.config/nvim/snippets"})
+--[[ vim.api.nvim_set_keymap("i", "<C-n>", "<Plug>luasnip-next-choice", {}) ]]
+--[[ vim.api.nvim_set_keymap("s", "<C-n>", "<Plug>luasnip-next-choice", {}) ]]
+--[[ vim.api.nvim_set_keymap("i", "<C-p>", "<Plug>luasnip-prev-choice", {}) ]]
+--[[ vim.api.nvim_set_keymap("s", "<C-p>", "<Plug>luasnip-prev-choice", {}) ]]

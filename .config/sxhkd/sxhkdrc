@@ -1,13 +1,14 @@
 # HotKeys
-    #Keyboard layout toggle
-shift + alt + space
-    python /home/sammy/Scripts/python/toggle_keyboard.py
 super + r
     rofi -show drun
 
+# rofi scripts
+alt + shift + u 
+    /home/Sammy/.rofi/config_files.py
+    
     #Apps
 alt + shift + b
-     firefox
+     /home/Sammy/.rofi/books-search.sh
 alt + shift + s 
      spotify
 alt + shift + i 
@@ -19,22 +20,26 @@ alt + shift + f
 alt + shift + l 
      betterlockscreen -l
 
+# Alacritty
+alt + shift + t
+    alacritty
+
 
 # Brightness
-XF86MonBrightnessUp
-     brightness.sh up
+# XF86MonBrightnessUp
+#      brightnessctl set +10%
 
-XF86MonBrightnessDown
-     brightness.sh down
+# XF86MonBrightnessDown
+#      brightnessctl set 10%-
 
 # Audio
-XF86AudioMute
-     amixer sset Master mute
-
-XF86AudioRaiseVolume
-     volume.sh up
-XF86AudioLowerVolume
-     volume.sh down
+# XF86AudioMute
+#      amixer sset Master mute
+#
+# XF86AudioRaiseVolume
+#      amixer sset Master 10%+
+# XF86AudioLowerVolume
+#      amixer sset Master 10%-
 
 # Power Off
 # PowerOff
