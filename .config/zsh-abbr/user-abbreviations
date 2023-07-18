@@ -1,0 +1,5 @@
+abbr "gic"="git clone "
+abbr "hw"="echo 'hello world'"
+abbr "rn"="ranger"
+abbr "so"="source"
+abbr "soz"="source ~/.zshrc"
