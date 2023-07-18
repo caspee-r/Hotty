@@ -4,23 +4,9 @@ local servers = {
 	"pyright",
 	--[[ "rnix"; ]]
 	"lua_ls",
-	"rust_analyzer",
-	"html",
-	"tailwindcss",
-	"cssls",
-	"eslint",
-	"tsserver",
-	"emmet_ls",
-	"clangd",
-	"bashls",
-	"texlab",
-	"html",
-	"yamlls",
-	"nil_ls",
-}
+	"rust_analyzer"}
 
 require("mason").setup({
-    ensure_installed = servers,
     ui = {
         keymaps = {
             apply_language_filter = "<C-g>",
