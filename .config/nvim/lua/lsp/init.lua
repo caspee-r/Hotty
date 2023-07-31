@@ -4,7 +4,9 @@ local servers = {
 	"pyright",
 	--[[ "rnix"; ]]
 	"lua_ls",
-	"rust_analyzer"}
+	"rust_analyzer",
+    "bashls"
+}
 
 require("mason").setup({
     ui = {
