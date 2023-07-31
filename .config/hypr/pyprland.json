@@ -1,0 +1,25 @@
+{
+    "pyprland": {
+        "plugins": [
+            "scratchpads"
+        ]
+    },
+    "expose": {
+        "include_special": true
+    },
+    "scratchpads" : {
+        "mail": {
+            "command": "kitty --class kitty-neomutt -e neomutt",
+            "animation": "fromTop",
+            "margin": 50,
+            "unfocus": "hide"
+        },
+        "ncmpcpp":{
+            "command": "kitty --class kitty-ncmpcpp -e ncmpcpp",
+            "animation": "fromBottom",
+            "margin": 100,
+            "lazy": true,
+            "unfocus":"hide"
+        }
+    }
+}
