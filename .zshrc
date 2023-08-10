@@ -57,12 +57,12 @@ zinit light zsh-users/zsh-autosuggestions
 
 ### Aliases
 alias v="nvim"
-alias vi="nvim"
 alias vim="nvim"
 alias py="python"
 alias t="tmuxinator"
 alias vimp="nvim ~/.config/nvim"
 alias rn="ranger"
+alias ls="lsd"
 
 
 ## FZF
@@ -91,3 +91,4 @@ zstyle :compinstall filename '/home/casper/.zshrc'
 autoload -Uz compinit
 compinit
 # End of lines added by compinstall
+export PATH=$PATH:/home/djella/.spicetify
