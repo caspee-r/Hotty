@@ -121,9 +121,8 @@ return {
 		build = "TSUpdate",
 	},
 
-	"p00f/nvim-ts-rainbow", -- a rainbow ts
-
 	"nvim-treesitter/nvim-treesitter-context",
+
 	{
 		"nvim-treesitter/playground",
 		cmd = "TSPlaygroundToggle",
