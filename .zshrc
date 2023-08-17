@@ -67,7 +67,10 @@ alias ls="lsd"
 
 ## FZF
 export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b"
-
+export FZF_DEFAULT_COMMAND="find . -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
+export FZF_ALT_C_COMMAND="fd -t d --hidden"
+export FZF_CTRL_T_COMMAND="find . -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
+export FZF_ALT_C_OPTS="--preview 'tree -C {}'"
 ## ENV
 export EDITOR="nvim"
 export PATH="$PATH:/home/casper/.local/bin"
