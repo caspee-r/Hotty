@@ -89,10 +89,6 @@ M.on_attach = function(client, bufnr)
 	if client.name == "lua_ls" or client.name == "pyright" then
 		client.server_capabilities.document_formatting = false
 	end
-	--lsp_keymaps(bufnr) 
-    vim.cmd([[ command! Format execute 'lua vim.lsp.buf.format{                filter = function(client) return client.name ~= "tsserver" end
-                filter = function(client) return client.name ~= "tsserver" end
-            }']]) 
 	lsp_highlight_document(client)
 end
 
