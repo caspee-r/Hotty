@@ -35,21 +35,29 @@ zinit ice as"command" from"gh-r" \
           atpull"%atclone" src"init.zsh"
 zinit light starship/starship
 
+
+zinit ice wait"1" lucid
 zinit light zsh-users/zsh-completions
+
+zinit ice wait"3" lucid
 zinit light hlissner/zsh-autopair
 # zinit light Aloxaf/fzf-tab
 zinit light zdharma-continuum/fast-syntax-highlighting
 # zinit ice wait"!2"
 # zinit light marlonrichert/zsh-autocomplete > /dev/null
+zinit ice wait"2" lucid
 zinit snippet https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/fzf/fzf.plugin.zsh
+zinit ice wait"2" lucid
 zinit snippet https://github.com/ohmyzsh/ohmyzsh/blob/master/lib/history.zsh
+zinit ice wait"2" lucid
 zinit snippet https://github.com/cheat/cheat/blob/master/scripts/cheat.zsh # auto-complition for cheat
 
 
 
+zinit ice wait"3" lucid
 zinit light  olets/zsh-abbr
 
-zinit ice wait lucid atload'_zsh_autosuggest_start'
+zinit ice wait"2" lucid atload'_zsh_autosuggest_start'
 zinit light zsh-users/zsh-autosuggestions
 
 # zinit ice depth=1 wait"2"
@@ -69,12 +77,13 @@ alias ls="lsd"
 export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b"
 export FZF_DEFAULT_COMMAND="find . -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
 export FZF_ALT_C_COMMAND="fd -t d --hidden"
-export FZF_CTRL_T_COMMAND="find . -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
+export FZF_CTRL_T_COMMAND="find . -path '*/\.*' -type d -prune -o -type f  -o -type l  | sed s/^..//"
 export FZF_ALT_C_OPTS="--preview 'tree -C {}'"
 ## ENV
 export EDITOR="nvim"
-export PATH="$PATH:/home/casper/.local/bin"
+export PATH="$PATH:$HOME/.local/bin:/home/:$HOME/.local/scripts"
 export CHEAT_USE_FZF=true
+export NC="$HOME/.config/nvim/init.lua"
 
 
 
