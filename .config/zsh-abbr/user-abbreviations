@@ -1,3 +1,4 @@
+abbr "del"="rm -rf "
 abbr "ga"="git add"
 abbr "gc"="git commit "
 abbr "gic"="git clone "
