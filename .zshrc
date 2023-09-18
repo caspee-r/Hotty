@@ -1,4 +1,5 @@
 
+
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
     print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
@@ -25,6 +26,20 @@ zinit light-mode for \
 ## Options
 setopt autocd
 setopt vi
+# fixing copy&paste 
+function vi-yank-wl-copy {
+    zle vi-yank
+   echo "$CUTBUFFER" | wl-copy 
+}
+zle -N vi-yank-wl-copy
+bindkey -M vicmd 'y' vi-yank-wl-copy
+
+wl-paste() {
+    CUTBUFFER=$(wl-paste)
+    zle yank
+}
+zle -N wl-paste
+bindkey -M vicmd 'p' wl-paste
 unsetopt BEEP
 
 
@@ -57,6 +72,7 @@ zinit snippet https://github.com/cheat/cheat/blob/master/scripts/cheat.zsh # aut
 zinit ice wait"3" lucid
 zinit light  olets/zsh-abbr
 
+
 zinit ice wait"2" lucid atload'_zsh_autosuggest_start'
 zinit light zsh-users/zsh-autosuggestions
 
@@ -71,14 +87,18 @@ alias t="tmuxinator"
 alias vimp="nvim ~/.config/nvim"
 alias rn="ranger"
 alias ls="lsd"
+alias zt="tmuxinator"
+alias t="tmuxinator"
+alias z="zoxide"
 
 
 ## FZF
-export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b"
+export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b,--preview 'bat {}'"
 export FZF_DEFAULT_COMMAND="find . -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
 export FZF_ALT_C_COMMAND="fd -t d --hidden"
-export FZF_CTRL_T_COMMAND="find . -path '*/\.*' -type d -prune -o -type f  -o -type l  | sed s/^..//"
-export FZF_ALT_C_OPTS="--preview 'tree -C {}'"
+export FZF_CTRL_T_COMMAND="fd -H -L --type f --type l --color never --search-path $HOME --search-path . "
+export FZF_CTRL_T_OPTS="--height 100 --preview 'bat --color=always --line-range :50 {}'"
+export FZF_ALT_C_OPTS="--height 70 --preview 'tree -C {} | head -50'"
 ## ENV
 export EDITOR="nvim"
 export PATH="$PATH:$HOME/.local/bin:/home/:$HOME/.local/scripts"
@@ -104,3 +124,4 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 export PATH=$PATH:/home/djella/.spicetify
+eval "$(zoxide init zsh)"
