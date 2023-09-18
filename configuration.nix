@@ -595,8 +595,8 @@ in
 				defaultOptions = ["--height=100%"
 					"--color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl:#0dbc79,hl+:#23d18b"
 				];
+                fileWidgetOptions = ["--preview 'bat --color=always --line-range :50 {}'"];
 				fileWidgetCommand =  "fd --type f --color=never";
-				fileWidgetOptions = ["--preview 'bat --color=always --line-range :50 {}'"];
 				tmux = {
 					enableShellIntegration = true;
 					shellIntegrationOptions = ["-d 40%"];
