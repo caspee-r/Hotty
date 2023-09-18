@@ -2,7 +2,6 @@ local status_ok, lualine = pcall(require, "lualine")
 if not status_ok then
     return
 end
-
 local hide_in_width = function()
     return vim.fn.winwidth(0) > 80
 end
@@ -33,8 +32,10 @@ local mode = {
 
 local filetype = {
     "filetype",
-    icons_enabled = false,
-    icon = nil,
+    icons_enabled = true,
+    icon_only = true,
+    colored = true,
+
 }
 
 local branch = {
@@ -65,22 +66,29 @@ end
 lualine.setup({
     options = {
         icons_enabled = true,
-        theme = "gruvbox",
+        theme = "auto",
         --[[ section_separators = { left = '', right = '' }, ]]
         --[[ component_separators = { left = '', right = '' }, ]]
-         section_separators = { left = '|', right = '|'},
-         component_separators = { left = '|', right = '|'},
+        component_separators = { left = '', right = '' },
+        section_separators = { left = '', right = '' },
+        --section_separators = { left = '|', right = '|'},
+        --component_separators = { left = '|', right = '|'},
         -- component_separators = { left = "", right = "" },
         -- section_separators = { left = "", right = "" },
         disabled_filetypes = { "alpha", "dashboard", "NvimTree", "Outline" },
         always_divide_middle = true,
+        globalstatus = true,
     },
     sections = {
-        lualine_a = { branch, diagnostics },
-        lualine_b = {},
-        lualine_c = {},
+        lualine_a = { branch },
+        lualine_b = { diagnostics },
+        lualine_c = {
+            function()
+                return '%='
+            end,
+        },
         -- lualine_x = { "encoding", "fileformat", "filetype" },
-        lualine_x = { diff, spaces, "encoding", filetype },
+        lualine_x = { diff, filetype },
         lualine_y = { location },
         lualine_z = { progress },
     },
@@ -95,10 +103,10 @@ lualine.setup({
     tabline = {},
     winbar = {
     },
-   extensions = {},
+    extensions = {},
 })
 
 lualine.refresh({
     scope = 'tabpage',
-    place = {'statusline','winbar','tabline'}
+    place = { 'statusline', 'winbar', 'tabline' }
 })
