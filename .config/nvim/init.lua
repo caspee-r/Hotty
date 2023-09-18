@@ -1,23 +1,19 @@
 require("caspeer.options")
 require("caspeer.lazy")
+---@diagnostic disable-next-line
 vim.cmd([[
 try
-  colorscheme kanagawa
-catch /^Vim\%((\a\+)\)\=:E185/
+  colorscheme sonokai
+catch /^vim\%((\a\+)\)\=:e185/
   colorscheme default
   set background=dark
 endtry
 ]])
-require("caspeer.autocommands")
-require("lsp")
 require("caspeer.keymaps")
+require("caspeer.autocommands")
+require("caspeer.functions")
+require("lsp")
 require("caspeer.lua_snip")
 require("caspeer.cmp")
---[[ require "caspeer.telescope" ]]
-require("caspeer.autopairs")
-require("caspeer.comment")
-require("caspeer.bufferline")
-require("caspeer.treesitter")
-require("caspeer.lualine")
-require("caspeer.gitsigns")
-require("caspeer.blankline")
+--require("caspeer.treesitter")
+--require("caspeer.lualine")
