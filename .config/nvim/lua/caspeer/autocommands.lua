@@ -2,31 +2,35 @@
 local autocmd = vim.api.nvim_create_autocmd
 
 vim.api.nvim_create_augroup("colorcolumn", { clear = true })
+vim.api.nvim_create_augroup("helpfiles",{clear = true})
 
 vim.cmd [[autocmd BufNewFile *.c :read ~/.config/nvim/templates/c.skel]]
-
-local function open_nvim_tree(data)
-    local no_name = data.file == "" and vim.bo[data.buf].buftype == ""
-    local dir_name = vim.fn.isdirectory(data.file) == 1
-    if not no_name then
-        if not dir_name then
-            return
-        else
-            vim.cmd.cd(data.file)
-            require("nvim-tree.api").tree.open({ focus = true, find_file = true })
-        end
-    else
-        require("nvim-tree.api").tree.toggle({ focus = false, find_file = true })
-    end
-end
-
---[[ vim.api.nvim_create_autocmd({ "BufWritePost" },{pattern="*.tex","*.md", ]]
---[[ command="lua req"}) ]]
 vim.cmd(" au TextYankPost * silent! lua vim.highlight.on_yank()")
-autocmd({ "VimEnter" }, { callback = open_nvim_tree })
 
---[[ autocmd( ]]
---[[ {"BufNewFile"}, ]]
---[[ {pattern = "*.py", ]]
---[[     command = "read ~/tst.py"} ]]
---[[ ) ]]
+vim.cmd [[
+autocmd FileType help nnoremap <buffer> <CR> <C-]>
+autocmd FileType help nnoremap <buffer> <BS> <C-T>
+autocmd FileType help nnoremap <buffer> o /'\l\{2,\}'<CR>
+autocmd FileType help nnoremap <buffer> O ?'\l\{2,\}'<CR>
+autocmd FileType help nnoremap <buffer> s /\|\zs\S\+\ze\|<CR>
+autocmd FileType help nnoremap <buffer> S ?\|\zs\S\+\ze\|<CR>
+]]
+
+vim.cmd [[
+augroup locallist
+    autocmd!
+    " Populate locallist with lsp diagnostics automatically 
+    autocmd User LspDiagnosticsChanged :lua vim.lsp.diagnostic.set_loclist({open_loclist = false})
+augroup END
+]]
+
+
+-- Delete [No Name] buffers
+autocmd("BufHidden", {
+  desc = "Delete [No Name] buffers",
+  callback = function(event)
+    if event.file == "" and vim.bo[event.buf].buftype == "" and not vim.bo[event.buf].modified then
+      vim.schedule(function() pcall(vim.api.nvim_buf_delete, event.buf, {}) end)
+    end
+  end,
+})
