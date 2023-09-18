@@ -1,11 +1,29 @@
 vim.loader.enable()
+
+vim.cmd[[set path+=**]]
+vim.cmd[[set path+=~]]
+vim.cmd[[set path+=~]]
+vim.cmd[[
+let g:netrw_keepdir = 0
+let g:netrw_winsize = 20
+let g:netrw_banner = 0
+let g:netrw_list_hide = '\(^\|\s\s\)\zs\.\S\+'
+let g:netrw_localcopydircmd = 'cp -r'
+hi! link netrwMarkFile Search
+let g:netrw_browsex_viewer= "xdg-open"
+nnoremap <leader>e :Lexplore %:p:h<CR>
+]]
+vim.cmd[[let g:markdown_fenced_languages = ["c","lua","python"] ]]
+
 local options = {
 	backup = false, -- creates a backup file
 	ruler = true,
+    wildignorecase = true,
+    wildignore = '*.git/*',
 	showcmd = true,
 	clipboard = "unnamedplus", -- allows neovim to access the system clipboard
 	colorcolumn = "80",
-	cmdheight = 2, -- more space in the neovim command line for displaying messages
+	cmdheight = 1, -- more space in the neovim command line for displaying messages
 	completeopt = { "menuone", "noselect" }, -- mostly just for cmp conceallevel = 0,                        -- so that `` is visible in markdown files
 	fileencoding = "utf-8", -- the encoding written to a file
 	hlsearch = false, -- highlight all matches on previous search pattern
@@ -52,14 +70,10 @@ local options = {
 	--[[ iskeyword = '-', ]]
 	whichwrap = "<,>,[,],h,l",
 }
-
 vim.opt.shortmess:append("c")
 for option_name, options_value in pairs(options) do
 	vim.opt[option_name] = options_value
 end
-
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
 
 -- vim.cmd "set whichwrap+=<,>,[,],h,l"
 --[[ vim.cmd("set nowritebackup") ]]
