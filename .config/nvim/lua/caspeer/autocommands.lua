@@ -4,7 +4,10 @@ local autocmd = vim.api.nvim_create_autocmd
 vim.api.nvim_create_augroup("colorcolumn", { clear = true })
 vim.api.nvim_create_augroup("helpfiles",{clear = true})
 
-vim.cmd [[autocmd BufNewFile *.c :read ~/.config/nvim/templates/c.skel]]
+vim.cmd [[
+augroup templates
+autocmd BufNewFile *.c 0r ~/.config/nvim/templates/c.skel
+]]
 vim.cmd(" au TextYankPost * silent! lua vim.highlight.on_yank()")
 
 vim.cmd [[

@@ -90,7 +90,7 @@ alias ls="lsd"
 alias zt="tmuxinator"
 alias t="tmuxinator"
 alias z="zoxide"
-
+alias em="emacsclient --create-frame"
 
 ## FZF
 export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b,--preview 'bat {}'"
