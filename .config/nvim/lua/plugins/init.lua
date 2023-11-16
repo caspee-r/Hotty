@@ -142,8 +142,9 @@ return {
     {
         "lukas-reineke/indent-blankline.nvim",
         event = "BufWinEnter",
+        main = "ibl",
         config = function()
-            local indent = require("indent_blankline")
+            local ibl = require("ibl")
             vim.cmd([[highlight IndentBlanklineIndent1 guifg=#0984ef gui=nocombine]])
 
             vim.cmd([[let g:indent_blankline_char='┆']])
@@ -151,13 +152,25 @@ return {
             vim.opt.list = true
             vim.opt.listchars:append("eol:↴")
 
-            indent.setup({
-                show_end_of_line = true,
-                show_current_context = true,
-                show_current_context_start = true,
-                char_highlight_list = {
-                    "IndentBlanklineIndent1",
+            ibl.setup({
+                --show_end_of_line = true,
+                --show_current_context = true,
+                --show_current_context_start = true,
+                debounce = 100,
+                indent = {char = "|"},
+                whitespace = {
+                    highlight = { "Whitespace", "NonText" },
+                    remove_blankline_trail = true,
+            },
+                scope = {
+                    exclude = { language = { "lua" } },
+                    show_start = true,
+                    show_end = true,
+                    highlight = { "Function", "Label" },
+
                 },
+
+
             })
         end
     },
