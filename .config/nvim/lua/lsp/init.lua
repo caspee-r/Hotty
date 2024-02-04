@@ -2,13 +2,12 @@
 
 local servers = {
     "pyright",
+	"gopls",
     "lua_ls",
     "rust_analyzer",
     "bashls",
     "tsserver",
     "clangd",
-    "zk",
-    "marksman"
 }
 
 require("mason").setup({
