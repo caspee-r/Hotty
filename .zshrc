@@ -25,7 +25,7 @@ zinit light-mode for \
 #
 ## Options
 setopt autocd
-setopt vi
+setopt emacs
 # fixing copy&paste 
 function vi-yank-wl-copy {
     zle vi-yank
@@ -124,4 +124,3 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 export PATH=$PATH:/home/djella/.spicetify
-eval "$(zoxide init zsh)"
