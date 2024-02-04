@@ -15,6 +15,9 @@
   "Load a file in current user's configuration directory"
   (load-file (expand-file-name file "~/.emacs.d")))
 
+(setq gc-cons-threshold 100000000)
+(setq read-process-output-max (* 1024 1024))
+
 (load-user-file "settings.el")
 (load-user-file "utils.el")
 (load-user-file "lsp.el")
@@ -43,6 +46,14 @@
   (setq whitespace-style '(face tabs spaces trailing space-before-tab newline indentation empty space-after-tab space-mark tab-mark))
   :diminish whitespace-mode)
 
+(use-package winner
+	:init
+	(setq winner-dont-bind-my-keys t)
+	(winner-mode 1)
+	:bind (("C-c u" . winner-undo)
+		   ("C-c r" . winner-redo))
+	)
+
 
 ;; UI CONFIGURATION
 (setq inhibit-startup-message t)
@@ -50,12 +61,12 @@
 (menu-bar-mode -1);Disable the menu bar
 (scroll-bar-mode -1);Disable the scrolbar
 (tooltip-mode -1);Disable the toolbar
-(load-theme 'gruber-darker)
+
 
 ;; (set-fringe-mode 10)  give some breathing room
-
+(set-face-attribute 'default nil :height 130)
 (set-face-background 'cursor "#c96")
-(set-face-background 'default "#111")
+;; (set-face-background 'default "#111")
 (set-face-background 'isearch "#ff0")
 (set-face-foreground 'isearch "#000")
 ;; (set-face-background 'lazy-highlight "#990")
@@ -63,7 +74,7 @@
 (set-face-foreground 'font-lock-comment-face "#fc0")
 
 ;; show trailing whitespace
-(setq-default show-trailing-whitespace t)
+;; (setq-default show-trailing-whitespace t)
 (setq-default indicate-empty-lines t)
 (setq-default require-final-newline t)
 ;; Single Space for Sentence Spacing
@@ -88,9 +99,8 @@
 
 
 
-(defvar efs/default-font-size 180)
-(defvar efs/default-variable-font-size 180)
-;; Make frame transparency overridable
+
+
 ;; relative numbers
 (setq display-line-numbers-type 'relative)
 ;; line-mode
@@ -119,7 +129,7 @@
 ;; statusline
 (use-package doom-modeline
     :init (doom-modeline-mode 1)
-    :custom ((doom-modeline-height 15)))
+    :custom ((doom-modeline-height 20)))
 
 ;; a nice package for coloring ([{
 (use-package rainbow-delimiters
@@ -187,6 +197,24 @@
 ;;     (ivy-prescient-mode 1)
 ;;     )
 
+(use-package vertico
+	:ensure t
+	:config
+	(vertico-mode 1)
+	(vertico-prescient-mode 1)
+
+	)
+
+(use-package vertico-prescient
+	:ensure t
+	)
+
+(use-package prescient
+	:ensure t
+	)
+
+
+
 (use-package helpful
     :commands (helpful-callable helpful-variable helpful-command helpful-key)
     :bind
@@ -205,8 +233,8 @@
 ;; is useful for displaying a panel showing each key binding you use in a panel on the right side of the frame.  Great for live streams and screencasts!
 
 
-(use-package command-log-mode
-    :commands command-log-mode)
+
+
 
 
 
@@ -214,6 +242,7 @@
 
 ;; MAGIT
 (use-package magit
+	:ensure t
     :commands magit-status
     :custom
     (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
@@ -224,7 +253,7 @@
           recentf-auto-cleanup 'never
           recentf-keep '(file-remote-p file-readable-p))
     (recentf-mode 1)
-    (let ((last-ido "~/.emacs.d/ido.last"))
+    (let ((last-ido "~/.cache/emacs/ido.last"))
         (when (file-exists-p last-ido)
             (delete-file last-ido)))
     :bind ("C-c f r" . recentf)
@@ -237,9 +266,15 @@
     :ensure nil
     :hook ('dired-mode-hook 'auto-revert-mode)
     :commands (dired dired-jump)
-    :bind (("C-x C-j" . dired-jump))
+    :bind (:map  dired-mode-map
+				 ("-" . 'dired-up-directory)
+				 ("C-x C-j" . dired-jump))
+
     :custom ((dired-listing-switches "-agho --group-directories-first"))
-)
+	:config
+	(setq dired-dwim-target t)
+	)
+
 
 (use-package dired-single
     :commands (dired dired-jump))
@@ -255,74 +290,104 @@
     (setq dired-open-extensions '(("png" . "feh")
                                   ("mkv" . "mpv"))))
 
-(use-package dired-hide-dotfiles
-    :hook (dired-mode . dired-hide-dotfiles-mode)
-)
+;;;  Registers
 
-(use-package ido
-    :init
-    (setq ido-enable-flex-matching t
-	  ido-auto-merge-work-directories-length -1
-	  ido-create-new-buffer 'always
-	  ido-use-filename-at-point 'guess
-	  ido-everywhere t
-	  ido-default-buffer-method 'selected-window)
-    :config
-    (ido-mode 1)
-    (ido-everywhere 1)
-    (put 'ido-exit-minibuffer 'disabled nil)
-    (when (require 'ido-ubiquitous nil t)
-	(ido-ubiquitous-mode 1))
-    (fido-mode 1)
-    )
+(setq register-preview-delay 0)
 
-(use-package flx-ido
-    :ensure t
-    :init (setq ido-enable-flex-matching t
-                ido-use-faces nil)
-    :config (flx-ido-mode 1)
-    )
 
+;; (use-package dired-hide-dotfiles
+;;     :hook (dired-mode . dired-hide-dotfiles-mode)
+;; 	:bind
+	;; 	)
+
+;; (use-package ido
+;;     :init
+;;     (setq ido-enable-flex-matching t
+;; 		  ido-auto-merge-work-directories-length -1
+;; 		  ido-create-new-buffer 'always
+;; 		  ido-use-filename-at-point 'guess
+;; 		  ido-everywhere t
+;; 		  ido-default-buffer-method 'selected-window)
+;;     :config
+;;     (ido-mode 1)
+;;     (ido-everywhere 1)
+;;     (put 'ido-exit-minibuffer 'disabled nil)
+;;     (when (require 'ido-ubiquitous nil t)
+;; 		(ido-ubiquitous-mode 1))
+;;     (fido-mode 1)
+;;     )
+
+;; (use-package flx-ido
+;;     :ensure t
+;;     :init (setq ido-enable-flex-matching t
+;;                 ido-use-faces nil)
+;;     :config (flx-ido-mode 1)
+;;     )
+
+
+;; (use-package icomplete-vertical
+;; 	:config
+;; 	(fido-mode 1)
+;; 	(icomplete-vertical-mode 1)
+;; 	)
 
 ;; Snippets
 (use-package yasnippet
     :config
     (yas-global-mode 1)
     )
-(use-package yasnippet-snippets)
+(use-package yasnippet-snippets
+	:ensure t)
 
 
 (use-package company
 	:defer 0.1
-    ;; :hook ((lsp-mode emacs-lisp-mode) . company-mode)
+    :hook ((prog-mode lsp-mode) . company-mode)
     :bind (:map company-active-map
-				("<Tab>" . company-complete-selection))
+				("<Tab>" . company-complete-selection)
+				("C-c h" . #'company-quickhelp-manual-begin)
+				)
     :custom
     (company-minimum-prefix-length 1)
     (company-idle-delay 0.0)
     :config
-	(global-company-mode)
+	(company-prescient-mode)
     (setq company-selection-wrap-around t)
-    )
-
-
-
+	(setq company-format-margin-function #'company-vscode-dark-icons-margin)
+	(setq company-backends
+		  '((
+			 :separate
+			 company-yasnippet
+			 company-dabbrev
+	 		 company-capf
+			 company-files
+			 company-keywords
+			 company-semantic
+			 ))
+		  )
+	)
 (use-package company-quickhelp
     :after company
     :hook (company-mode . company-quickhelp-mode )
 
      )
 
+(use-package company-prescient
+	:ensure t
+	)
+
+
+
 
 ;; Languages
 (use-package python-mode
-    :ensure nil
+    :ensure t
     :hook (python-mode . lsp)
     :custom
     (python-shell-interpreter "python3"))
 
 ;;Lispy
-(use-package lispy
+( use-package lispy
 	:init
 	(add-hook 'lisp-interaction-mode-hook 'lispy-mode)
 	(add-hook 'eval-expression-minibuffer-setup-hook 'lispy-mode)
@@ -331,6 +396,47 @@
     (lispy-mode t)
 
     )
+
+(use-package olivetti
+	:hook (org-mode . olivetti-mode)
+	:config
+	(setq olivetti-body-width 80
+		  olivetti-minimum-body-width 60
+		  olivetti-recall-visual-line-mode-entry-state t
+		  olivetti-recall-visual-line-mode-exit-state t)
+	)
+
+(use-package tree-edit
+	:ensure t
+	)
+
+(use-package doc-view
+	:config
+	(setq
+	 doc-view-continuous t
+	 doc-view-imenu-enabled t
+	 doc-view-mupdf-use-svg t
+	 
+	 )
+	)
+
+(use-package khoj
+	:ensure t
+	:bind ("C-c s" . 'khoj)
+	:config
+	(setq
+	 khoj-api-key "kk-RYncqQRadfI-5elNGk9RGQY50wScJ_knoMLM58WClDg"
+	 khoj-auto-index t
+	 khoj-auto-setup t
+	 khoj-org-directories '("~/org/zettle")
+	 khoj-org-files '("~/org/inbox.org")
+	 )
+	)
+
+(use-package gnuplot
+	:ensure t)
+(use-package gnuplot-mode
+	:ensure t)
 
 ;; compilation mode
 (require 'compile)
@@ -354,8 +460,7 @@
           (shrink-window (- h 9))
 
 		  )
-
-      ))
+	  ))
 (global-set-key [f9] 'my-recompile)
 
 (add-hook 'c-mode-hook
@@ -367,12 +472,10 @@
                     ;; variables:
                     ;; $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
 		    (let ((file (file-name-nondirectory buffer-file-name)))
-                      (format "%s -c -o %s.o %s %s %s"
+                      (format "%s -o %s.o %s"
                               (or (getenv "CC") "gcc")
                               (file-name-sans-extension file)
-                              (or (getenv "CPPFLAGS") "-DDEBUG=9")
-                              (or (getenv "CFLAGS") "-ansi -pedantic -Wall -g")
-			      file))))))
+                              			      file))))))
 
 (setq compilation-scroll-output 'first-error)
 (defun caspeer/compilation-finish-function (buffer status)
@@ -398,9 +501,95 @@
 (global-set-key (kbd "C-.") 'compilation )
 
 (global-set-key (kbd "C-.") 'scratch-buffer)
+(global-set-key (kbd "C-c SPC") 'async-shell-command)
 ;; (global-set-key (kbd "" ) 'next-buffer)
 ;; (global-set-key (kbd "" ) 'previous-buffer)
+
 (global-hl-line-mode t)
 (repeat-mode t)
 
 (put 'set-goal-column 'disabled nil)
+
+;; Buffer
+(global-set-key "\M-n"  'next-buffer)
+(global-set-key "\M-p"  'previous-buffer)
+;; Window
+(global-set-key (kbd "C-.") #'other-window)
+(global-set-key (kbd "C-,") #'prev-window)
+
+(defun caspeer/rm-this-file ()
+	(interactive)
+	(delete-file (buffer-file-name))
+	(kill-this-buffer)
+	)
+
+(global-set-key (kbd "C-c d") 'caspeer/rm-this-file)
+(global-set-key (kbd "C-c / ") 'duplicate-line)
+(global-set-key (kbd "C-c <insert>") 'insert-char)
+
+
+(defadvice text-scale-increase (around all-buffers (arg) activate)
+	(dolist (buffer (buffer-list))
+		(with-current-buffer buffer
+			ad-do-it)))
+
+(defadvice kill-line (before kill-line-autoreindent activate)
+  "Kill excess whitespace when joining lines.
+If the next line is joined to the current line, kill the extra indent whitespace in front of the next line."
+  (when (and (eolp) (not (bolp)))
+    (save-excursion
+      (forward-char 1)
+      (just-one-space 1))))
+
+(defadvice kill-ring-save (before slick-copy activate compile)
+  "When called interactively with no active region, copy a single line instead."
+  (interactive
+   (if mark-active (list (region-beginning) (region-end))
+     (message "Single line killed")
+     (list (line-beginning-position)
+	   (line-beginning-position 2)))))
+
+(defadvice kill-region (before slick-cut activate compile)
+  "When called interactively with no active region, kill a single line instead."
+  (interactive
+   (if mark-active (list (region-beginning) (region-end))
+     (list (line-beginning-position)
+	   (line-beginning-position 2)))))
+
+(defadvice backward-kill-word (around delete-pair activate)
+	(if (eq (char-syntax (char-before)) ?\()
+			(progn
+				(backward-char 1)
+				(save-excursion
+					(forward-sexp 1)
+					(delete-char -1))
+				(forward-char 1)
+				(append-next-kill)
+				(kill-backward-chars 1))
+		ad-do-it))
+
+
+(setq treesit-language-source-alist
+	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+		(cmake "https://github.com/uyha/tree-sitter-cmake")
+		(css "https://github.com/tree-sitter/tree-sitter-css")
+		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+		(go "https://github.com/tree-sitter/tree-sitter-go")
+		(html "https://github.com/tree-sitter/tree-sitter-html")
+		(c "https://github.com/tree-sitter/tree-sitter-c")
+		)
+	  )
+;; (setq major-mode-remap-alist
+;; 	  '(
+;; 		(c-mode . c-ts-mode)
+		
+
+;; 		)
+;; 	  )
+
+(define-advice load-theme (:before (&rest _args) theme-dont-propagate)
+	"Discard all themes before loading new."
+	(mapc #'disable-theme custom-enabled-themes))
+
+
+(load-theme 'minimal-light )
