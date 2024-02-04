@@ -25,7 +25,7 @@ zinit light-mode for \
 #
 ## Options
 setopt autocd
-setopt emacs
+setopt vi
 # fixing copy&paste 
 function vi-yank-wl-copy {
     zle vi-yank
@@ -124,3 +124,30 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 export PATH=$PATH:/home/djella/.spicetify
+# =============================================================================
+#
+# Utility functions for zoxide.
+#
+
+# pwd based on the value of _ZO_RESOLVE_SYMLINKS.
+function __zoxide_pwd() {
+    uiltin pwd -L
+}
+
+# cd + custom logic based on the value of _ZO_ECHO.
+function __zoxide_cd() {
+    # shellcheck disable=SC2164
+    uiltin cd -- "$@"
+}
+
+# =============================================================================
+#
+# Hook configuration for zoxide.
+#
+
+# Hook to add new entries to the database.
+function __zoxide_hook() {
+	# shellcheck disable=SC2312
+}
+
+eval "$(zoxide init zsh)"
