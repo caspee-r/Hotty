@@ -98,7 +98,7 @@
 		    (org-level-6 . 1.1)
 		    (org-level-7 . 1.1)
 		    (org-level-8 . 1.1)))
-	(set-face-attribute (car face) nil :font "Cantarell" :weight 'regular :height (cdr face)))
+	(set-face-attribute (car face) nil :font "ETBembo" :weight 'regular :height (cdr face)))
 
     (set-face-attribute 'org-block nil    :foreground "red" :inherit 'fixed-pitch)
     (set-face-attribute 'org-table nil    :inherit 'fixed-pitch)
@@ -212,7 +212,7 @@
 (add-hook 'org-capture-mode-hook 'delete-other-windows)
 
 
-(defcustom org-roam-filter-by-entries '("refs")
+(defcustom org-roam-filter-by-entries '("refs", "slip-box")
   "Entries (tags or directories) to be excluded for Org-roam node filtering."
   :type '(repeat string)
   :group 'org-roam)
@@ -247,18 +247,21 @@
 	"Show only Org-roam nodes that match entries in `org-roam-filter-by-entries`."
 	(interactive)
 	(org-roam-node-find nil nil (lambda (node) (not (caspeer/org-roam-node--filter-excluded node)))))
+(global-set-key (kbd "C-c n o") 'caspeer/org-roam-node-find-only)
 
 (defun caspeer/org-roam-node-find-entry (&optional new-entries)
-  "Show only Org-roam nodes matching the specified entries interactively.
+	"Show only Org-roam nodes matching the specified entries interactively.
 If NEW-ENTRIES are provided, use them as the entries to match by (seperate entries by ,).
 Otherwise, prompt the user to select from existing entries."
-  (interactive)
-  (if new-entries
-      (let ((org-roam-filter-by-entries new-entries))
-        (caspeer/org-roam-node-find-only))
-    (let ((selected-entries (completing-read-multiple "Select entries to filter by (seperate by ,): " org-roam-filter-by-entries)))
-      (let ((org-roam-filter-by-entries selected-entries))
-        (caspeer/org-roam-node-find-only)))))
+	(interactive)
+	(if new-entries
+			(let ((org-roam-filter-by-entries new-entries))
+				(caspeer/org-roam-node-find-only))
+		(let ((selected-entries (completing-read-multiple "Select entries to filter by (seperate by ,): " org-roam-filter-by-entries)))
+			(let ((org-roam-filter-by-entries selected-entries))
+				(caspeer/org-roam-node-find-only)))))
+(global-set-key (kbd "C-c n e") 'caspeer/org-roam-node-find-entry)
+
 
 
 (define-skeleton fleeting-note-skeleton
@@ -277,6 +280,28 @@ Otherwise, prompt the user to select from existing entries."
 	)
 
 ;;Org-Roam
+
+
+;; (defun caspeer/org-add-date-to-headlines-in-file ()
+;; 	(interactive)
+;; 	(insert (concat "#+date: " (format-time-string "%Y-%M-%D %H")) )
+;; 		)
+
+(defun caspeer/org-add-ids-to-headlines-in-file ()
+	"Add ID properties to all headlines in the inbox.org  file which
+do not already have one."
+	(interactive )
+	(if (string= (buffer-file-name) (concat org-roam-directory "/inbox.org"))
+				 (org-map-entries 'org-id-get-create)
+		
+		)
+	)
+
+(add-hook 'org-mode-hook
+          (lambda ()
+              (add-hook 'before-save-hook 'caspeer/org-add-ids-to-headlines-in-file nil 'local)))
+
+
 (use-package org-roam
 	:ensure t
 	;; :after org
@@ -310,11 +335,11 @@ Otherwise, prompt the user to select from existing entries."
 		:unnarrowed-sections (1))
 	   ("r" "refrence" plain "%?"
 		:target (file+head "refs/${slug}.org" "#+title:${title}\n
-#+created:%<%Y-%m-%d>\n
+#+date:%<%Y-%m-%d %a> \n
 ")
 		:unnarrowed t
 		)
-	   	   ))
+	   ))
 	;; Add more templates as needed
 	:config
 	
@@ -334,22 +359,20 @@ Otherwise, prompt the user to select from existing entries."
 	(org-roam-db-autosync-mode)
 	(setq org-roam-file-extensions '("org" "org_archive")
 		  org-id-extra-files (org-roam-list-files)
-		  org-roam-dailies-directory "journal/"
+		  org-roam-dailies-directory "."
 		  org-roam-dailies-capture-templates '(
-											   ("f" "fleeting" entry
-												"** TODO %i%?"
-												:target (file+head "inbox.org" "#+title: %<%Y-%m-%d>\n
-* Fleeting Thoughts\n")
+											   ("f" "fleeting" entry "* %i%?"
+												:target (file+head "inbox.org" "#+date: %<%Y-%m-%d>\n")
 												)
 											   )
 		  org-roam-node-display-template "${title}"
 		  org-roam-capture-ref-templates 
 		  '(("r" "ref" entry "* %?" :target
 			 (file+head "refs/${slug}.org" "#+title: ${title}\n
-#+Date: %<%Y-%m-%d>\n
+#+date: %<%Y-%m-%d> %a\n
 #+filetags:\n")
 			 :unnarrowed t
-			  ))
+			 ))
 		  )
 		  
 	;; If using org-roam-protocol
@@ -406,25 +429,4 @@ Otherwise, prompt the user to select from existing entries."
 
 	;; 			;; Add more templates as needed
 	;; 			))
-
-
-	;; Journaling
-
-(defvar org-journal-dir "~/journal/")
-(defun get-today-journal-file ()
-  (let ((daily-name (format-time-string "%Y-%m-%d")))
-       (expand-file-name (concat org-journal-dir daily-name)))
-  )
-
-(defun today-journal-file ()
-    "Create and load a journal file based on today's date."
-    (interactive)
-    (set-buffer (org-capture-target-buffer (get-today-journal-file)))
-    (goto-char (point-max))
-    )
-
-;; GTD
-
-
-
 

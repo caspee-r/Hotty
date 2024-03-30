@@ -60,6 +60,8 @@
       frame-inhibit-implied-resize t
       ediff-window-setup-function 'ediff-setup-windows-plain
       next-line-add-newlines t
+	  switch-to-buffer-obey-display-actions t
+	  list-matching-lines-default-context-lines 3
 	  )
 
 (setq create-lockfiles nil)

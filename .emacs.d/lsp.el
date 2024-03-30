@@ -42,9 +42,9 @@
 	(setq lsp-ui-sideline-delay 0.05)
 	)
 
-(use-package lsp-treemacs
-    :after lsp)
-
+(use-package lsp-pyright
+	:ensure t
+	)
 
 ;; (use-package flycheck
 ;;     :ensure t

@@ -2,11 +2,11 @@
 ;; The default is 800 kilobytes.  Measured in bytes.
 
 (defconst user-init-dir
-  (cond ((boundp 'user-emacs-directory)
-         user-emacs-directory)
-        ((boundp 'user-init-directory)
-         user-init-directory)
-        (t "~/.emacs.d/")))
+	(cond ((boundp 'user-emacs-directory)
+           user-emacs-directory)
+          ((boundp 'user-init-directory)
+           user-init-directory)
+          (t "~/.emacs.d/")))
 
 (setq user-emacs-directory (expand-file-name "~/.cache/emacs"))
 
@@ -24,27 +24,43 @@
 ;; (load-user-file "evil.el")
 (load-user-file "org-mode.el")
 
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
+(defvar custom-tab-width 4 "the width of a tab character")
 
-;; (setq disabled-command-function nil)
+(defun disable-tabs () (setq indent-tabs-mode nil))
 
+(defun enable-tabs  ()
+  ;;(local-set-key (kbd "TAB") 'tab-to-tab-stop)
+  (local-set-key (kbd "TAB") 'indent-for-tab-command)
+  (setq indent-tabs-mode t)
+  (setq tab-width custom-tab-width))
 
-(use-package no-littering)
+(setq-default electric-indent-inhibit t)
+
+(add-hook 'prog-mode-hook 'enable-tabs)
+
+;; (global-set-key (kbd "TAB") 'tab-to-tab-stop)
+
+(setq c-ts-mode-indent-offset custom-tab-width)
+(add-hook 'c-ts-mode-hook 'subword-mode)
+(setq backward-delete-char-untabify-method 'hungry)
+
 
 (use-package whitespace
-  :bind ("C-c t w" . whitespace-mode)
-  :init
-  (setq whitespace-line-column nil
-        whitespace-display-mappings '((space-mark 32 [183] [46])
-                                      (newline-mark 10 [9166 10])
-                                      (tab-mark 9 [9654 9] [92 9])))
-  :config
-  (set-face-attribute 'whitespace-space       nil :foreground "#666666" :background nil)
-  (set-face-attribute 'whitespace-newline     nil :foreground "#666666" :background nil)
-  (set-face-attribute 'whitespace-indentation nil :foreground "#666666" :background nil)
-  (setq whitespace-style '(face tabs spaces trailing space-before-tab newline indentation empty space-after-tab space-mark tab-mark))
-  :diminish whitespace-mode)
+	:bind ("C-c t w" . whitespace-mode)
+	:init
+	(setq whitespace-line-column nil
+		whitespace-display-mappings '((space-mark 32 [183] [46])
+										(newline-mark 10 [9166 10])
+										(tab-mark 9 [9654 9] [92 9])))
+	:config
+	(set-face-attribute 'whitespace-space       nil :foreground "#666666" :background nil)
+	(set-face-attribute 'whitespace-newline     nil :foreground "#666666" :background nil)
+	(set-face-attribute 'whitespace-indentation nil :foreground "#666666" :background nil)
+	(setq whitespace-style '(face tabs spaces trailing space-before-tab newline indentation empty space-after-tab space-mark tab-mark))
+	:diminish whitespace-mode)
+
+(use-package no-littering
+	:ensure t)
 
 (use-package winner
 	:init
@@ -340,41 +356,75 @@
 	:ensure t)
 
 
-(use-package company
-	:defer 0.1
-    :hook ((prog-mode lsp-mode) . company-mode)
-    :bind (:map company-active-map
-				("<Tab>" . company-complete-selection)
-				("C-c h" . #'company-quickhelp-manual-begin)
-				)
-    :custom
-    (company-minimum-prefix-length 1)
-    (company-idle-delay 0.0)
-    :config
-	(company-prescient-mode)
-    (setq company-selection-wrap-around t)
-	(setq company-format-margin-function #'company-vscode-dark-icons-margin)
-	(setq company-backends
-		  '((
-			 :separate
-			 company-yasnippet
-			 company-dabbrev
-	 		 company-capf
-			 company-files
-			 company-keywords
-			 company-semantic
-			 ))
-		  )
-	)
-(use-package company-quickhelp
-    :after company
-    :hook (company-mode . company-quickhelp-mode )
+;; (use-package company
+;; 	:defer 0.1
+;;     :hook ((prog-mode lsp-mode) . company-mode)
+;;     :bind (:map company-active-map
+;; 				("<Tab>" . company-complete-selection)
+;; 				("C-c h" . #'company-quickhelp-manual-begin)
+;; 				)
+;;     :custom
+;;     (company-minimum-prefix-length 1)
+;;     (company-idle-delay 0.0)
+;;     :config
+;; 	(company-prescient-mode)
+;;     (setq company-selection-wrap-around t)
+;; 	(setq company-format-margin-function #'company-vscode-dark-icons-margin)
+;; 	(setq company-backends
+;; 		  '((
+;; 			 :separate
+;; 			 company-yasnippet
+;; 			 company-dabbrev
+;; 	 		 company-capf
+;; 			 company-files
+;; 			 company-keywords
+;; 			 company-semantic
+;; 			 ))
+;; 		  )
+;; 	)
+;; (use-package company-quickhelp
+;;     :after company
+;;     :hook (company-mode . company-quickhelp-mode )
 
-     )
+;;      )
 
-(use-package company-prescient
+
+(use-package corfu
 	:ensure t
+	:init
+	(global-corfu-mode)
+	:config
+	;; Enable auto completion and configure quitting
+	(setq corfu-auto t
+		  corfu-quit-no-match 'separator) ;; or t
 	)
+
+(use-package yasnippet-capf
+	:after cape
+	:config
+	(add-to-list 'completion-at-point-functions #'yasnippet-capf)
+	(setq yasnippet-capf-lookup-by 'name) ;; Prefer the name of the snippet instead
+	)
+
+(use-package cape
+	:init
+	;; Add to the
+	;; global default value of `completion-at-point-functions' which is
+	;; used by `completion-at-point'.  The order of the functions matters, the
+	;; first function returning a result wins.  Note that the list of buffer-local
+	;; completion functions takes precedence over the global list.
+	(add-to-list 'completion-at-point-functions #'cape-dabbrev)
+	(add-to-list 'completion-at-point-functions #'cape-file)
+	;; (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+    (add-to-list 'completion-at-point-functions #'cape-keyword)
+	;; (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+	)
+
+
+
+;; (use-package company-prescient
+;; 	:ensure t
+;; 	)
 
 
 
@@ -396,19 +446,6 @@
     (lispy-mode t)
 
     )
-
-(use-package olivetti
-	:hook (org-mode . olivetti-mode)
-	:config
-	(setq olivetti-body-width 80
-		  olivetti-minimum-body-width 60
-		  olivetti-recall-visual-line-mode-entry-state t
-		  olivetti-recall-visual-line-mode-exit-state t)
-	)
-
-(use-package tree-edit
-	:ensure t
-	)
 
 (use-package doc-view
 	:config
@@ -433,10 +470,20 @@
 	 )
 	)
 
-(use-package gnuplot
-	:ensure t)
-(use-package gnuplot-mode
-	:ensure t)
+(global-set-key (kbd "C-c i") 'iedit-mode)
+
+(use-package undo-tree
+	:ensure t
+	:hook
+	(prog-mode . undo-tree-mode)
+	:config
+	(setq
+	 undo-tree-visualizer-diff t
+	 
+	 )
+	
+	)
+
 
 ;; compilation mode
 (require 'compile)
@@ -492,16 +539,42 @@
      (setq compilation-error-screen-columns nil)
    )
    (add-hook 'compilation-mode-hook 'my-compilation-mode-hook)
+
+
+(defun move-region (start end n)
+	"Move the current region up or down by N lines."
+	(interactive "r\np")
+	(let ((line-text (delete-and-extract-region start end)))
+		(forward-line n)
+		(let ((start (point)))
+			(insert line-text)
+			(setq deactivate-mark nil)
+			(set-mark start))))
+
+(defun move-region-up (start end n)
+  "Move the current line up by N lines."
+  (interactive "r\np")
+  (move-region start end (if (null n) -1 (- n))))
+
+(defun move-region-down (start end n)
+  "Move the current line down by N lines."
+  (interactive "r\np")
+  (move-region start end (if (null n) 1 n)))
+
+(global-set-key (kbd "M-<up>") 'move-region-up)
+(global-set-key (kbd "M-<down>") 'move-region-down)
+
+
+
 										; keymaps
 (global-set-key (kbd "<f7>t") 'load-theme)
 (global-set-key (kbd "C-c e d") 'eval-defun)
 (global-set-key (kbd "C-c e r") 'eval-region)
 (global-set-key (kbd "C-c e e") 'eval-expression)
 
-(global-set-key (kbd "C-.") 'compilation )
-
-(global-set-key (kbd "C-.") 'scratch-buffer)
 (global-set-key (kbd "C-c SPC") 'async-shell-command)
+
+(global-set-key (kbd "C-c m") 'multi-occur-in-matching-buffers)
 ;; (global-set-key (kbd "" ) 'next-buffer)
 ;; (global-set-key (kbd "" ) 'previous-buffer)
 
@@ -528,10 +601,10 @@
 (global-set-key (kbd "C-c <insert>") 'insert-char)
 
 
-(defadvice text-scale-increase (around all-buffers (arg) activate)
-	(dolist (buffer (buffer-list))
-		(with-current-buffer buffer
-			ad-do-it)))
+;; (defadvice text-scale-increase (around all-buffers (arg) activate)
+;; 	(dolist (buffer (buffer-list))
+;; 		(with-current-buffer buffer
+;; 			ad-do-it)))
 
 (defadvice kill-line (before kill-line-autoreindent activate)
   "Kill excess whitespace when joining lines.
@@ -569,6 +642,13 @@ If the next line is joined to the current line, kill the extra indent whitespace
 		ad-do-it))
 
 
+(use-package treesit-auto
+	:config
+	(treesit-auto-add-to-auto-mode-alist 'all)
+	(setq
+	 treesit-auto-install-all t)
+	)
+
 (setq treesit-language-source-alist
 	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
 		(cmake "https://github.com/uyha/tree-sitter-cmake")
@@ -577,13 +657,15 @@ If the next line is joined to the current line, kill the extra indent whitespace
 		(go "https://github.com/tree-sitter/tree-sitter-go")
 		(html "https://github.com/tree-sitter/tree-sitter-html")
 		(c "https://github.com/tree-sitter/tree-sitter-c")
+		(python "https://github.com/tree-sitter/tree-sitter-python")
+		(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+		(gas "https://github.com/sirius94/tree-sitter-gas")
 		)
 	  )
+(setq	treesit-font-lock-level 4)
 ;; (setq major-mode-remap-alist
 ;; 	  '(
-;; 		(c-mode . c-ts-mode)
-		
-
+;; 		(asm-mode . gas-ts-mode)
 ;; 		)
 ;; 	  )
 
@@ -592,4 +674,17 @@ If the next line is joined to the current line, kill the extra indent whitespace
 	(mapc #'disable-theme custom-enabled-themes))
 
 
-(load-theme 'minimal-light )
+(load-theme 'doom-opera )
+(put 'upcase-region 'disabled nil)
+(mouse-avoidance-mode 'jump)
+
+(setq display-buffer-alist
+	  '(
+		("\\*undo-tree\\*"
+		 (display-buffer-in-direction)
+		 (direction . right)
+		 (window-width . 0.40)
+		 )
+		)
+	  )
+(put 'dired-find-alternate-file 'disabled nil)
