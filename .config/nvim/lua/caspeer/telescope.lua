@@ -16,7 +16,7 @@ telescope.setup({
 			height = 0.9,
 			mirror = { "results", "prompt" },
 		},
-		--[[ prompt_title = "sami", ]]
+		--[[ prompt_title = "vim", ]]
 		prompt_prefix = " ",
 		selection_caret = " ",
 		path_display = { "smart" },

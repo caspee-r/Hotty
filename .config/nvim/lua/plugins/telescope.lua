@@ -57,7 +57,7 @@ return {
                         height = 0.80,
                         preview_cutoff = 120,
                     },
-                    prompt_title = "sami",
+                    prompt_title = "vim",
                     prompt_prefix = " ",
                     selection_caret = " ",
                     multi_icon = "",
