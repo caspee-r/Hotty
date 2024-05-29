@@ -148,7 +148,7 @@
 			 )
 			("a" "Assignment" entry (file+headline "~/org/college.org" "Assignments")
 			 "* TODO %?\n %^g \n  SCHEDULED: %t\n  :PROPERTIES:\n  :DEADLINE: %^T\n  :END:")
-
+			
 			("j" "Journal"
 			 entry (function today-journal-file)
 			 "* %<%Y-%m-%d>: \n %? "
@@ -411,22 +411,8 @@ do not already have one."
 	)
 
 (global-set-key (kbd "C-c t k") 'pomodoro-kill)
-	;; (setq org-roam-capture-templates
-	;;           '(("d" "default" plain
-	;; 			 (function org-roam--capture-get-point)
-	;; 			 "%?"
-	;; 			 :file-name "${slug}"
-	;; 			 :head "#+title: ${title}\n"
-	;; 			 :unnarrowed t)
 
-	;; 			("s" "slip-box" plain
-	;; 			 (function org-roam--capture-get-point)
-	;; 			 "%?"
-	;; 			 :file-name "slip-box/${slug}"
-	;; 			 :head "#+title: ${title}\n"
-	;; 			 :unnarrowed t
-	;; 			 :unnarrowed-sections (1))
+;;;  Blogging
 
-	;; 			;; Add more templates as needed
-	;; 			))
+
 
