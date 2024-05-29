@@ -1,5 +1,6 @@
 -- All my Autocmd
 local autocmd = vim.api.nvim_create_autocmd
+--local Caspeer = vim.api.nvim_create_augroup
 
 vim.api.nvim_create_augroup("colorcolumn", { clear = true })
 vim.api.nvim_create_augroup("helpfiles",{clear = true})
@@ -35,5 +36,14 @@ autocmd("BufHidden", {
     if event.file == "" and vim.bo[event.buf].buftype == "" and not vim.bo[event.buf].modified then
       vim.schedule(function() pcall(vim.api.nvim_buf_delete, event.buf, {}) end)
     end
+  end,
+})
+
+autocmd("TermOpen", {
+  desc = "drop in the term in insert mode",
+  callback = function(event)
+	  vim.bo.modifiable = true
+	  vim.api.nvim_input("i")
+
   end,
 })

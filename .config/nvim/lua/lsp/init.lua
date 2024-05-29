@@ -13,7 +13,7 @@ local servers = {
 require("mason").setup({
     ui = {
         keymaps = {
-            apply_language_filter = "<C-g>",
+            apply_language_filter = "<C-f>",
         },
     },
 })

@@ -2,10 +2,8 @@ local opts = { noremap = true, silent = true }
 
 local term_opts = { silent = true }
 
-
 -- abbreviation
 vim.cmd("ab tel Telescope")
-vim.cmd("ab sm SessionManager")
 
 -- Shorten function name
 local keymap = vim.api.nvim_set_keymap
@@ -17,7 +15,22 @@ keymap("n", "<leader>e", ":Lexplore<CR>", term_opts)
 vim.keymap.set("i", "<C-c>", "<Esc>")
 
 
+-- start lsp
 
+-- zettelkasten 
+vim.keymap.set("n", "<leader>z", "<cmd>Telekasten panel<CR>")
+-- Most used functions
+vim.keymap.set("n", "<leader>zf", "<cmd>Telekasten find_notes<CR>")
+vim.keymap.set("n", "<leader>zg", "<cmd>Telekasten search_notes<CR>")
+vim.keymap.set("n", "<leader>zd", "<cmd>Telekasten goto_today<CR>")
+vim.keymap.set("n", "<leader>zz", "<cmd>Telekasten follow_link<CR>")
+vim.keymap.set("n", "<leader>zn", "<cmd>Telekasten new_note<CR>")
+vim.keymap.set("n", "<leader>zc", "<cmd>Telekasten show_calendar<CR>")
+vim.keymap.set("n", "<leader>zb", "<cmd>Telekasten show_backlinks<CR>")
+vim.keymap.set("n", "<leader>zI", "<cmd>Telekasten insert_img_link<CR>")
+
+-- Call insert link automatically when we start typing a link
+vim.keymap.set("i", "[[", "<cmd>Telekasten insert_link<CR>")
 
 -- a template for text objects
 --vim.cmd [[
@@ -54,7 +67,7 @@ vim.keymap.set("x", "<leader>p", [["_dP]])
 vim.keymap.set({ "n", "v" }, "<leader>y", [["+y]])
 vim.keymap.set("n", "<leader>Y", [["+Y]])
 vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
-vim.keymap.set("n", "<leader>x", "<cmd>!chmod +x %<CR>", { silent = true })
+vim.keymap.set("n", "<leader>x", "<cmd>!chmod u+x %<CR>", { silent = true })
 
 -- source file
 vim.keymap.set("n", "<leader><leader>", function()
@@ -107,15 +120,28 @@ keymap("n", "]c", ":cnext<CR>", opts)
 
 
 -- lsp formatting
-vim.keymap.set("n", "<leader>f", vim.lsp.buf.format)
-vim.keymap.set("n", "<leader>r", vim.lsp.buf.references)
-vim.keymap.set("n", "gd", vim.lsp.buf.definition)
-vim.keymap.set("n", "K", vim.lsp.buf.hover)
-vim.keymap.set("n", "gi", vim.lsp.buf.implementation)
-vim.keymap.set("n", "gi", vim.lsp.buf.implementation)
-vim.keymap.set("n","<leader>k",vim.lsp.buf.signature_help)
-vim.keymap.set("n","<leader>rn",vim.lsp.buf.rename )
--- Navigate buffers
+local Caspeer = vim.api.nvim_create_augroup('Caspeer',{ })
+vim.api.nvim_create_autocmd('LspAttach',
+{
+	group = Caspeer,
+	callback = function(e)
+		local optx = {buffer = e.buf }
+		vim.keymap.set("n", "<leader>f", vim.lsp.buf.format,optx)
+		vim.keymap.set("n", "<leader>r", vim.lsp.buf.references,optx)
+		vim.keymap.set("n", "gd", vim.lsp.buf.definition,optx)
+		vim.keymap.set("n", "K", vim.lsp.buf.hover,optx)
+		vim.keymap.set("n", "gi", vim.lsp.buf.implementation,optx)
+		vim.keymap.set("n","<leader>k",vim.lsp.buf.signature_help,optx)
+		vim.keymap.set("n","<leader>rn",vim.lsp.buf.rename,optx)
+		vim.keymap.set("n","<leader>rf",vim.lsp.buf.references,optx)
+		vim.keymap.set("n","<leader>ca",vim.lsp.buf.code_action,optx)
+		vim.keymap.set("n","<leader>of",vim.diagnostic.open_float,optx)
+		vim.keymap.set("n","[e",vim.diagnostic.goto_next,optx)
+		vim.keymap.set("n","]e",vim.diagnostic.goto_prev,optx)
+	end
+	}
+	)
+	-- Navigate buffers
 
 -- Move text up and down
 keymap("n", "<A-k>", "<Esc>:m .-2<CR>==gi", opts)
@@ -152,15 +178,3 @@ keymap("t", "<C-l>", "<C-\\><C-N><C-w>l", term_opts)
 --Trouble--
 keymap("n", "<leader>q", "<cmd>TroubleToggle<CR>", opts)
 
-vim.cmd [[
-function! ZoteroCite()
-  let format = &filetype =~ '.*tex' ? 'citep' : 'pandoc'
-  let api_call = 'http://127.0.0.1:23119/better-bibtex/cayw?format='.format.'&brackets=1'
-  let ref = system('curl -s '.shellescape(api_call))
-  return ref
-endfunction
-
-noremap <leader>tz "=ZoteroCite()<CR>p
-inoremap <C-z> <C-r>=ZoteroCite()<CR>
-
-]]

@@ -8,29 +8,36 @@ return {
     {
         "sainnhe/sonokai",
         lazy = true,
-    },
-    {
-        "rebelot/kanagawa.nvim",
-        lazy = true,
-        opts = {
-            undercurl = true, -- enable undercurls
-            commentStyle = { italic = true },
-            functionStyle = {},
-            keywordStyle = { italic = true },
-            statementStyle = { bold = true },
-            typeStyle = {},
-            variablebuiltinStyle = { italic = true },
-            specialReturn = true,    -- special highlight for the return keyword
-            specialException = true, -- special highlight for exception handling keywords
-            transparent = false,     -- do not set background color
-            dimInactive = false,     -- dim inactive window `:h hl-NormalNC`
-            globalStatus = false,    -- adjust window separators highlight for laststatus=3
-            terminalColors = true,   -- define vim.g.terminal_color_{0,17}
-            colors = {},
-            theme = "default",       -- Load "default" theme or the experimental "light" theme
-        },
-        priority = 100,
-    },
+	},
+	{
+		"seandewar/paragon.vim",
+		lazy = true,
+		config = function ()
+			vim.g.paragon_transparent_bg = true
+		end
+	},
+	{
+		"rebelot/kanagawa.nvim",
+		lazy = true,
+		opts = {
+			undercurl = true, -- enable undercurls
+			commentStyle = { italic = true },
+			functionStyle = {},
+			keywordStyle = { italic = true },
+			statementStyle = { bold = true },
+			typeStyle = {},
+			variablebuiltinStyle = { italic = true },
+			specialReturn = true,    -- special highlight for the return keyword
+			specialException = true, -- special highlight for exception handling keywords
+			transparent = false,     -- do not set background color
+			dimInactive = false,     -- dim inactive window `:h hl-NormalNC`
+			globalStatus = false,    -- adjust window separators highlight for laststatus=3
+			terminalColors = true,   -- define vim.g.terminal_color_{0,17}
+			colors = {},
+			theme = "default",       -- Load "default" theme or the experimental "light" theme
+		},
+		priority = 100,
+	},
 
     {
         "joshdick/onedark.vim",
@@ -42,14 +49,8 @@ return {
         "williamboman/mason.nvim",
     },
     "williamboman/mason-lspconfig.nvim",
-
-    -- enable LSP
-    {
-        "neovim/nvim-lspconfig",
-    },
-
-
-    -- pretty lsp
+	
+    -- jump diagnostics lsp
     {
         "folke/trouble.nvim",
         --dependencies = "kyazdani42/nvim-web-devicons",
@@ -60,15 +61,6 @@ return {
         opts = {},
         lazy = true,
     },
-
-    -- cmp plugins
-    "hrsh7th/nvim-cmp",         -- The completion plugin
-    "hrsh7th/cmp-buffer",       -- buffer completions
-    "hrsh7th/cmp-path",         -- path completions
-    "hrsh7th/cmp-cmdline",      -- cmdline completions
-    "hrsh7th/cmp-nvim-lua",     -- lua completions
-    "saadparwaiz1/cmp_luasnip", -- snippet completions
-    "hrsh7th/cmp-nvim-lsp",     -- lsp completion
 
     -- tmux-vim navigation
     {
@@ -84,8 +76,7 @@ return {
     },
 
     -- snippets
-    "L3MON4D3/LuaSnip",             --snippet engine
-    "rafamadriz/friendly-snippets", -- a bunch of snippets to use
+	"rafamadriz/friendly-snippets", -- a bunch of snippets to use
 
     -- autopairs
     {
