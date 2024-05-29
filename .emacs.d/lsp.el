@@ -2,18 +2,20 @@
 
 ;; Lsp-Mode
 (use-package lsp-mode
-    :commands (lsp lsp-deferred)
+    :commands (lsp)
 	:init
     (setq lsp-keymap-prefix "C-c l")
     ;; (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
     (setq lsp-idle-delay 0.500)
 
     :bind
-    (:map lsp-mode-map
-		  ("<Tab>" . company-indent-or-complete-common))
+    ;; (:map lsp-mode-map
+	;; 	  ("<Tab>" . company-indent-or-complete-common))
     :config
     (lsp-enable-which-key-integration t)
 	(setq lsp-auto-guess-root t)
+	(setq lsp-completion-provider :none)
+
 	(setq lsp-log-io nil)
 	(setq lsp-restart 'auto-restart)
 	(setq lsp-enable-symbol-highlighting nil)
@@ -27,8 +29,7 @@
 	(setq lsp-semantic-tokens-enable nil)
 	(setq lsp-enable-folding nil)
 	(setq lsp-enable-imenu nil)
-	(setq lsp-enable-snippet nil)
-  	)
+	(setq lsp-enable-snippet nil))
 
 (use-package lsp-ui
     :hook (lsp-mode . lsp-ui-mode)
