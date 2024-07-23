@@ -12,7 +12,6 @@ return {
 		"saadparwaiz1/cmp_luasnip",
 	},
 	config = function()
-
 		local kind_icons = {
 			Text = "󰊄",
 			Method = "m",
@@ -54,10 +53,10 @@ return {
 				"clangd",
 				"lua_ls",
 				"bashls",
+				"rust_analyzer",
 			},
 			handlers = {
 				function(server_name) -- default handler (optional)
-
 					require("lspconfig")[server_name].setup {
 						capabilities = capabilities
 					}
@@ -76,6 +75,29 @@ return {
 						}
 					}
 				end,
+				["rust_analyzer"] = function()
+					local lspconfig = require("lspconfig")
+					lspconfig.rust_analyzer.setup {
+						capabilities = capabilities,
+						autostart = false,
+						settings = {
+							diagnostics = {
+								enable = true,
+							},
+							single_file_support = true,
+						}
+					}
+				end,
+				["clangd"] = function()
+					local lspconfig = require("lspconfig")
+					lspconfig.clangd.setup {
+						capabilities = capabilities,
+						autostart = false,
+						settings = {
+							single_file_support = true,
+						}
+					}
+				end,
 			}
 		})
 
@@ -90,10 +112,16 @@ return {
 				['<C-j>'] = cmp.mapping.select_next_item(cmp_select),
 				["<C-f>"] = cmp.mapping.scroll_docs(4),
 				["<C-b>"] = cmp.mapping.scroll_docs(-4),
-				['<C-m>'] = cmp.mapping.confirm({ select = true }),
+				--["<C-d>"] = cmp.open_docs(),
+				["<Return>"] = cmp.mapping.confirm({ select = true }),
 				["<C-Space>"] = cmp.mapping.complete(),
 			}),
 
+			view = {
+				docs = {
+					auto_open = false,
+				}
+			},
 			formatting = {
 				fields = { "kind", "abbr", "menu" },
 				format = function(entry, vim_item)
@@ -108,8 +136,9 @@ return {
 			sources = cmp.config.sources({
 				{ name = 'nvim_lsp' },
 				{ name = 'luasnip' }, -- For luasnip users.
-				}, {
-					{ name = 'buffer' },
+				{ name = 'path' },
+			}, {
+				{ name = 'buffer' },
 			}),
 
 			confirm_opts = {
@@ -128,13 +157,16 @@ return {
 				style = "minimal",
 				border = "rounded",
 				source = "always",
-				header = "",
+				header = "caspeer",
 				prefix = "",
 			},
 		})
 
 		cmp.setup.cmdline({ '/', '?' }, {
-			--mapping = cmp.mapping.preset.cmdline(),
+			mapping = {
+				["<C-j>"] = { c = cmp.mapping.select_next_item() },
+				["<C-k>"] = { c = cmp.mapping.select_prev_item() },
+			},
 			sources = {
 				{ name = 'buffer' }
 			}
@@ -145,18 +177,16 @@ return {
 			mapping = cmp.mapping.preset.cmdline(),
 			sources = cmp.config.sources({
 				{ name = 'path' }
-				}, {
-					{
-						name = 'cmdline',
-						options = {
-							ignore_cmds = { 'Man', '!' }
-						}
+			}, {
+				{
+					name = 'cmdline',
+					options = {
+						ignore_cmds = { 'Man', '!' }
 					}
+				}
 			}),
 			matching = { disallow_symbol_nonprefix_matching = false },
 		})
 	end
 
 }
-
-

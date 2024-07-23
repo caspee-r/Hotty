@@ -22,8 +22,10 @@ local options = {
     wildignorecase = true,
     wildignore = '*.git/*',
 	showcmd = true,
+	spell = true,
+	spelllang = 'en_us',
 	clipboard = "unnamedplus", -- allows neovim to access the system clipboard
-	colorcolumn = "80",
+	colorcolumn = "100",
 	cmdheight = 1, -- more space in the neovim command line for displaying messages
 	completeopt = { "menuone", "noselect" }, -- mostly just for cmp conceallevel = 0,                        -- so that `` is visible in markdown files
 	fileencoding = "utf-8", -- the encoding written to a file

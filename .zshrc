@@ -44,12 +44,6 @@ unsetopt BEEP
 
 
 #plugins
-    ## Starship
-zinit ice as"command" from"gh-r" \
-          atclone"./starship init zsh > init.zsh; ./starship completions zsh > _starship" \
-          atpull"%atclone" src"init.zsh"
-zinit light starship/starship
-
 
 zinit ice wait"1" lucid
 zinit light zsh-users/zsh-completions
@@ -101,11 +95,18 @@ export FZF_CTRL_T_OPTS="--height 100 --preview 'bat --color=always --line-range 
 export FZF_ALT_C_OPTS="--height 70 --preview 'tree -C {} | head -50'"
 ## ENV
 export EDITOR="nvim"
-export PATH="$PATH:$HOME/.local/bin:/home/:$HOME/.local/scripts"
+export PATH="$PATH:$HOME/.local/bin:$HOME/.local/scripts"
 export CHEAT_USE_FZF=true
 export NC="$HOME/.config/nvim/init.lua"
+export DENO_INSTALL="/home/caspeer/.deno"
+export PATH="$DENO_INSTALL/bin:$PATH"
 
 
+# Minimal Zsh prompt
+PROMPT='%F{blue}%n%f@%F{green}%m%f:%F{yellow}%~%f %# '
+
+# Customize colors for better appearance
+autoload -U colors && colors
 
 # The following lines were added by compinstall
 
@@ -126,31 +127,8 @@ compinit
 export PATH=$PATH:/home/djella/.spicetify
 # =============================================================================
 #
-# Utility functions for zoxide.
 #
-
-# pwd based on the value of _ZO_RESOLVE_SYMLINKS.
-function __zoxide_pwd() {
-    uiltin pwd -L
-}
-
-# cd + custom logic based on the value of _ZO_ECHO.
-function __zoxide_cd() {
-    # shellcheck disable=SC2164
-    uiltin cd -- "$@"
-}
-
-# =============================================================================
 #
-# Hook configuration for zoxide.
-#
-
-# Hook to add new entries to the database.
-function __zoxide_hook() {
-	# shellcheck disable=SC2312
-}
-
-eval "$(zoxide init zsh)"
 #compdef eww
 
 autoload -U is-at-least
@@ -782,3 +760,13 @@ if [ "$funcstack[1]" = "_eww" ]; then
 else
     compdef _eww eww
 fi
+
+
+# =============================================================================
+#
+
+# =============================================================================
+#
+# To initialize zoxide, add this to your configuration (usually ~/.zshrc):
+#
+eval "$(zoxide init zsh)"

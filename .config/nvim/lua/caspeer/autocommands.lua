@@ -5,10 +5,6 @@ local autocmd = vim.api.nvim_create_autocmd
 vim.api.nvim_create_augroup("colorcolumn", { clear = true })
 vim.api.nvim_create_augroup("helpfiles",{clear = true})
 
-vim.cmd [[
-augroup templates
-autocmd BufNewFile *.c 0r ~/.config/nvim/templates/c.skel
-]]
 vim.cmd(" au TextYankPost * silent! lua vim.highlight.on_yank()")
 
 vim.cmd [[
@@ -40,10 +36,10 @@ autocmd("BufHidden", {
 })
 
 autocmd("TermOpen", {
-  desc = "drop in the term in insert mode",
+  desc = "drop in to the term in insert mode",
   callback = function(event)
 	  vim.bo.modifiable = true
 	  vim.api.nvim_input("i")
-
   end,
 })
+vim.cmd[[autocmd TermOpen * setlocal nonumber norelativenumber]]

@@ -9,13 +9,7 @@ return {
         "sainnhe/sonokai",
         lazy = true,
 	},
-	{
-		"seandewar/paragon.vim",
-		lazy = true,
-		config = function ()
-			vim.g.paragon_transparent_bg = true
-		end
-	},
+	
 	{
 		"rebelot/kanagawa.nvim",
 		lazy = true,
@@ -29,7 +23,7 @@ return {
 			variablebuiltinStyle = { italic = true },
 			specialReturn = true,    -- special highlight for the return keyword
 			specialException = true, -- special highlight for exception handling keywords
-			transparent = false,     -- do not set background color
+			transparent = true,     -- do not set background color
 			dimInactive = false,     -- dim inactive window `:h hl-NormalNC`
 			globalStatus = false,    -- adjust window separators highlight for laststatus=3
 			terminalColors = true,   -- define vim.g.terminal_color_{0,17}
@@ -56,7 +50,7 @@ return {
         --dependencies = "kyazdani42/nvim-web-devicons",
         cmd = "Trouble",
         keys = {
-            { "<leader>q", "<cmd>TroubleToggle<cr>", desc = "trouble" },
+            { "<leader>q", "<cmd>Trouble qflist toggle<cr>", desc = "trouble" },
         },
         opts = {},
         lazy = true,
@@ -115,7 +109,6 @@ return {
     },
 
 
-    -- plugin that help for better commenting
     -- nvim-surround
     {
         "kylechui/nvim-surround",
@@ -199,12 +192,6 @@ return {
         }
     },
 
-    {
-        "nvim-treesitter/playground",
-        cmd = "TSPlaygroundToggle",
-        lazy = true,
-    },
-
     -- buffdelete
     {
         "famiu/bufdelete.nvim",
@@ -235,133 +222,98 @@ return {
     },
 
     "kyazdani42/nvim-web-devicons", -- devicone
-    {
-        "lewis6991/gitsigns.nvim",
-        tag = "release", -- To use the latest release
-        event = { "BufReadPre", "BufNewFile" },
-        opts = {
-            signs = {
-                add = { hl = "GitSignsAdd", text = "│", numhl = "GitSignsAddNr", linehl = "GitSignsAddLn" },
-                change = { hl = "GitSignsChange", text = "│", numhl = "GitSignsChangeNr", linehl = "GitSignsChangeLn" },
-                delete = { hl = "GitSignsDelete", text = "_", numhl = "GitSignsDeleteNr", linehl = "GitSignsDeleteLn" },
-                topdelete = {
-                    hl = "GitSignsDelete",
-                    text = "‾",
-                    numhl = "GitSignsDeleteNr",
-                    linehl = "GitSignsDeleteLn"
-                },
-                changedelete = {
-                    hl = "GitSignsChange",
-                    text = "~",
-                    numhl = "GitSignsChangeNr",
-                    linehl = "GitSignsChangeLn"
-                },
-            },
-            signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`
-            numhl = false,     -- Toggle with `:Gitsigns toggle_numhl`
-            linehl = false,    -- Toggle with `:Gitsigns toggle_linehl`
-            word_diff = false, -- Toggle with `:Gitsigns toggle_word_diff`
-            watch_gitdir = {
-                interval = 1000,
-                follow_files = true,
-            },
-            attach_to_untracked = true,
-            current_line_blame = false, -- Toggle with `:Gitsigns toggle_current_line_blame`
-            current_line_blame_opts = {
-                virt_text = true,
-                virt_text_pos = "eol", -- 'eol' | 'overlay' | 'right_align'
-                delay = 1000,
-                ignore_whitespace = false,
-            },
-            current_line_blame_formatter = "<author>, <author_time:%Y-%m-%d> - <summary>",
-            sign_priority = 6,
-            update_debounce = 100,
-            status_formatter = nil, -- Use default
-            max_file_length = 40000,
-            preview_config = {
-                -- Options passed to nvim_open_win
-                border = "single",
-                style = "minimal",
-                relative = "cursor",
-                row = 0,
-                col = 1,
-            },
-            yadm = {
-                enable = false,
-            },
-        }
-    },
     "lukas-reineke/cmp-rg",
-    {
-        "folke/zen-mode.nvim",
+	-- markdown previewer
+	{
+		"toppair/peek.nvim",
+		event = { "VeryLazy" },
+		build = "deno task --quiet build:fast",
+		config = function()
+			require("peek").setup(
+				{ app ='webview', }
+			)
+			vim.api.nvim_create_user_command("PeekOpen", require("peek").open, {})
+			vim.api.nvim_create_user_command("PeekClose", require("peek").close, {})
+		end,
+	},
 
-        opts = {
-            window = {
-                backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
-                -- height and width can be:
-                -- * an absolute number of cells when > 1
-                -- * a percentage of the width / height of the editor when <= 1
-                -- * a function that returns the width or the height
-                width = 120, -- width of the Zen window
-                height = 1,  -- height of the Zen window
-                -- by default, no options are changed for the Zen window
-                -- uncomment any of the options below, or add other vim.wo options you want to apply
-                options = {
-                    -- signcolumn = "no", -- disable signcolumn
-                    -- number = false, -- disable number column
-                    -- relativenumber = false, -- disable relative numbers
-                    -- cursorline = false, -- disable cursorline
-                    -- cursorcolumn = false, -- disable cursor column
-                    -- foldcolumn = "0", -- disable fold column
-                    -- list = false, -- disable whitespace characters
-                },
-            },
-            plugins = {
-                -- disable some global vim options (vim.o...)
-                -- comment the lines to not apply the options
-                options = {
-                    enabled = true,
-                    ruler = false,              -- disables the ruler text in the cmd line area
-                    showcmd = false,            -- disables the command in the last line of the screen
-                },
-                twilight = { enabled = true },  -- enable to start Twilight when zen mode opens
-                gitsigns = { enabled = false }, -- disables git signs
-                tmux = { enabled = true },      -- disables the tmux statusline
-                -- this will change the font size on kitty when in zen mode
-                -- to make this work, you need to set the following kitty options:
-                -- - allow_remote_control socket-only
-                -- - listen_on unix:/tmp/kitty
-                kitty = {
-                    enabled = false,
-                    font = "+4", -- font size increment
-                },
-                -- this will change the font size on alacritty when in zen mode
-                -- requires  Alacritty Version 0.10.0 or higher
-                -- uses `alacritty msg` subcommand to change font size
-                alacritty = {
-                    enabled = false,
-                    font = "14", -- font size
-                },
-                -- this will change the font size on wezterm when in zen mode
-                -- See alse also the Plugins/Wezterm section in this projects README
-                wezterm = {
-                    enabled = false,
-                    -- can be either an absolute font size or the number of incremental steps
-                    font = "+4", -- (10% increase per step)
-                },
-            },
-            -- callback where you can add custom code when the Zen window opens
-            on_open = function(win)
-            end,
-            -- callback where you can add custom code when the Zen window closes
-            on_close = function()
-            end,
-        },
-        keys = { {
-            "<leader>z",
-            "<cmd>ZenMode<CR>",
-            desc = "toggle zen mode"
-        } },
-        lazy = true,
-    },
+	{
+		"folke/zen-mode.nvim",
+
+		opts = {
+			window = {
+				backdrop = 0.95, -- shade the backdrop of the Zen window. Set to 1 to keep the same as Normal
+				-- height and width can be:
+				-- * an absolute number of cells when > 1
+				-- * a percentage of the width / height of the editor when <= 1
+				-- * a function that returns the width or the height
+				width = 120, -- width of the Zen window
+				height = 1,  -- height of the Zen window
+				-- by default, no options are changed for the Zen window
+				-- uncomment any of the options below, or add other vim.wo options you want to apply
+				options = {
+					-- signcolumn = "no", -- disable signcolumn
+					-- number = false, -- disable number column
+					-- relativenumber = false, -- disable relative numbers
+					-- cursorline = false, -- disable cursorline
+					-- cursorcolumn = false, -- disable cursor column
+					-- foldcolumn = "0", -- disable fold column
+					-- list = false, -- disable whitespace characters
+				},
+			},
+			plugins = {
+				-- disable some global vim options (vim.o...)
+				-- comment the lines to not apply the options
+				options = {
+					enabled = true,
+					ruler = false,              -- disables the ruler text in the cmd line area
+					showcmd = false,            -- disables the command in the last line of the screen
+				},
+				twilight = { enabled = true },  -- enable to start Twilight when zen mode opens
+				gitsigns = { enabled = false }, -- disables git signs
+				tmux = { enabled = true },      -- disables the tmux statusline
+				-- this will change the font size on kitty when in zen mode
+				-- to make this work, you need to set the following kitty options:
+				-- - allow_remote_control socket-only
+				-- - listen_on unix:/tmp/kitty
+				kitty = {
+					enabled = false,
+					font = "+4", -- font size increment
+				},
+				-- this will change the font size on alacritty when in zen mode
+				-- requires  Alacritty Version 0.10.0 or higher
+				-- uses `alacritty msg` subcommand to change font size
+				alacritty = {
+					enabled = false,
+					font = "14", -- font size
+				},
+				-- this will change the font size on wezterm when in zen mode
+				-- See alse also the Plugins/Wezterm section in this projects README
+				wezterm = {
+					enabled = false,
+					-- can be either an absolute font size or the number of incremental steps
+					font = "+4", -- (10% increase per step)
+				},
+			},
+			-- callback where you can add custom code when the Zen window opens
+			on_open = function(win)
+			end,
+			-- callback where you can add custom code when the Zen window closes
+			on_close = function()
+			end,
+		},
+		keys = { {
+			"<leader>z",
+			"<cmd>ZenMode<CR>",
+			desc = "toggle zen mode"
+		} },
+		lazy = true,
+	},
+	{
+		"nvim-telescope/telescope-bibtex.nvim",
+		config = function ()
+			require"telescope".load_extension("bibtex")
+		end,
+	},
+
 }

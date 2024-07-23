@@ -118,7 +118,11 @@
 
 
 ;; relative numbers
-(setq display-line-numbers-type 'relative)
+(setq display-line-numbers-type 'relative
+	  display-line-numbers-width-start t
+
+	  )
+
 ;; line-mode
 ;; numbers for programming mode
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
@@ -140,7 +144,7 @@
 ;-----------
 
 ;; icons package
-(use-package all-the-icons)
+;; (use-package all-the-icons)
 
 
 ;; a nice package for coloring ([{
@@ -282,7 +286,7 @@
 						  ("-" . 'dired-up-directory)
 						  ("C-x C-j" . dired-jump))
 
-			 :custom ((dired-listing-switches "-agho --group-directories-first"))
+			 :custom ((dired-listing-switches "-aghlt ")) ;;--group-directories-first
 			 :config
 			 (setq dired-dwim-target t)
 			 )
@@ -291,8 +295,8 @@
 (use-package dired-single
 			 :commands (dired dired-jump))
 
-(use-package all-the-icons-dired
-			 :hook (dired-mode . all-the-icons-dired-mode))
+;; (use-package all-the-icons-dired
+;; 			 :hook (dired-mode . all-the-icons-dired-mode))
 
 (use-package dired-open
 			 :commands (dired dired-jump)
@@ -503,7 +507,7 @@
 			   )
 			 )
 
-(global-set-key (kbd "C-c i") 'iedit-mode)
+(global-set-key (kbd "C-c C-i") 'iedit-mode)
 
 (use-package undo-tree
 			 :ensure t
@@ -516,6 +520,7 @@
 			  )
 			 )
 
+(use-package zotxt)
 
 ;; compilation mode
 (require 'compile)
@@ -749,7 +754,7 @@
 			   (mapc #'disable-theme custom-enabled-themes))
 
 
-(load-theme 'doom-opera )
+(load-theme 'almost-mono-gray )
 (put 'upcase-region 'disabled nil)
 (mouse-avoidance-mode 'jump)
 

@@ -264,20 +264,6 @@ Otherwise, prompt the user to select from existing entries."
 
 
 
-(define-skeleton fleeting-note-skeleton
-	"my fleeting notes skeleton definition"
-	"* ${title}"
-	)
-
-(defun caspeer/org-roam-init-fleeting-note ()
-	""
-	(interactive)
-	(concat "** ${title} %?")
-	(org-id-get-create)
-	(org-todo)
-	(org-newline-and-indent)
-
-	)
 
 ;;Org-Roam
 
@@ -304,7 +290,6 @@ do not already have one."
 
 (use-package org-roam
 	:ensure t
-	;; :after org
 	:bind (
 		   ("C-c n r" . org-roam-node-random)
 		   ("C-c n f" . org-roam-node-find)
@@ -361,8 +346,9 @@ do not already have one."
 		  org-id-extra-files (org-roam-list-files)
 		  org-roam-dailies-directory "."
 		  org-roam-dailies-capture-templates '(
-											   ("f" "fleeting" entry "* %i%?"
-												:target (file+head "inbox.org" "#+date: %<%Y-%m-%d>\n")
+											   ("f" "fleeting" plain "* %i%?"
+												:target (file+head "fleeting-notes.org" "#+date: %<%Y-%m-%d>\n")
+												:empty-lines 1
 												)
 											   )
 		  org-roam-node-display-template "${title}"
@@ -377,42 +363,4 @@ do not already have one."
 		  
 	;; If using org-roam-protocol
 	(require 'org-roam-protocol))
-
-
-
-
-(use-package org-pomodoro
-	:ensure t
-	:bind
-	(
-	 ("C-c t s" . org-pomodoro)
-	 )
-	:config
-
-	(setq
-	 org-pomodoro-length 55
-	 org-pomodoro-short-break-length 5
-	 org-pomodoro-long-break-length 15
-	 org-pomodoro-long-break-frequency 2
-	 org-pomodoro-manual-break t
-	 org-pomodoro-play-sounds t
-	 org-pomodoro-ask-upon-killing t
-	 org-pomodoro-ticking-frequency 2
-	 org-pomodoro-audio-player "mpv"
-	 org-pomodoro-clock-break t
-	 org-pomodoro-expiry-time 150
-	 )
-	)
-
-(defun pomodoro-kill ()
-	"interactive org-pomodoro-kill"
-	(interactive)
-	(org-pomodoro-kill)
-	)
-
-(global-set-key (kbd "C-c t k") 'pomodoro-kill)
-
-;;;  Blogging
-
-
 

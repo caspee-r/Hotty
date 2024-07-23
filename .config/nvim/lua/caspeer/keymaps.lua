@@ -176,5 +176,7 @@ keymap("t", "<C-k>", "<C-\\><C-N><C-w>k", term_opts)
 keymap("t", "<C-l>", "<C-\\><C-N><C-w>l", term_opts)
 
 --Trouble--
-keymap("n", "<leader>q", "<cmd>TroubleToggle<CR>", opts)
+keymap("n", "<leader>q", "<cmd>Trouble qflist toggle<CR>", opts)
+
+keymap("n","<leader>i",":make<CR>",opts)
 

@@ -1,7 +1,6 @@
 
 local fn = vim.fn
 local api = vim.api
-local cmd = vim.cmd
 
 local function map(m, l, r)
 	vim.keymap.set(m, l, r, { noremap = true, silent = true })

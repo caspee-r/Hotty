@@ -119,4 +119,5 @@ element selected {
 }
 //@theme "/usr/share/rofi/themes/DarkBlue.rasi"
 //@theme "/home/caspeer/.local/share/rofi/themes/tokyonight.rasi"
-@theme "/home/caspeer/.local/share/rofi/themes/nord.rasi"
+//@theme "/home/caspeer/.local/share/rofi/themes/nord.rasi"
+@theme "/usr/share/rofi/themes/dmenu.rasi"
