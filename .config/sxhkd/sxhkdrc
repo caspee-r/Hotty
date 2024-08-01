@@ -1,0 +1,57 @@
+# HotKeys
+super + r
+    rofi -show drun
+
+# rofi scripts
+alt + shift + u 
+    /home/Sammy/.rofi/config_files.py
+    
+    #Apps
+alt + shift + b
+     /home/Sammy/.rofi/books-search.sh
+alt + shift + s 
+     spotify
+alt + shift + i 
+     idle
+    # Open File manager
+alt + shift + f 
+     thunar
+
+alt + shift + l 
+     betterlockscreen -l
+
+# Alacritty
+alt + shift + t
+    alacritty
+
+
+# Brightness
+# XF86MonBrightnessUp
+#      brightnessctl set +10%
+
+# XF86MonBrightnessDown
+#      brightnessctl set 10%-
+
+# Audio
+# XF86AudioMute
+#      amixer sset Master mute
+#
+# XF86AudioRaiseVolume
+#      amixer sset Master 10%+
+# XF86AudioLowerVolume
+#      amixer sset Master 10%-
+
+# Power Off
+# PowerOff
+# │    eww -c $HOME/.config/eww/Powermenu/ open-many --toggle background background-closer buttons-exit profile-exit quotes-exit cl │ ose-exit
+#eww Dashboard
+# ctrl + alt + period
+     # exec $HOME/.config/eww/dashboard/launch_dashboard
+     # eww -c $HOME/.config/eww/Main/ open-many --toggle background system fetch dots spotify power applications links profile clock weather bluetooth mail karma
+     
+
+
+
+# Open Keybindings Help
+shift + alt + h
+     sxhkd-keys
