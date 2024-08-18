@@ -39,6 +39,11 @@ autoload vi-search-fix
 zle -N vi-search-fix
 bindkey -M viins '\e/' vi-search-fix
 
+
+function cal() {
+    if [ -t 1 ]; then ncal -b "${@}"; else command cal "${@}"; fi
+}
+
 # fixing copy&paste 
 function vi-yank-wl-copy {
     zle vi-yank
@@ -74,17 +79,18 @@ alias zt="tmuxinator"
 alias t="tmuxinator"
 alias z="zoxide"
 alias em="emacsclient --create-frame"
+alias bat="batcat"
 
 ## FZF
-export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b,--preview 'bat {}'"
+export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b,--preview 'batcat {}'"
 export FZF_DEFAULT_COMMAND="find . -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
-export FZF_ALT_C_COMMAND="fd -t d --hidden"
-export FZF_CTRL_T_COMMAND="fd -H -L --type f --type l --color never --search-path $HOME --search-path . "
-export FZF_CTRL_T_OPTS="--height 100 --preview 'bat --color=always --line-range :50 {}'"
+export FZF_ALT_C_COMMAND="fdfind -t d --hidden"
+export FZF_CTRL_T_COMMAND="fdfind -H -L --type f --type l --color never --search-path $HOME --search-path . "
+export FZF_CTRL_T_OPTS="--height 100 --preview 'batcat --color=always --line-range :50 {}'"
 export FZF_ALT_C_OPTS="--height 70 --preview 'tree -C {} | head -50'"
 ## ENV
 export EDITOR="nvim"
-export PATH="$PATH:$HOME/.local/bin:$HOME/.local/scripts"
+export PATH="$PATH:$HOME/.local/bin:$HOME/.local/scripts:$HOME/.local/bin:$HOME/software/nvim-linux64/bin"
 export CHEAT_USE_FZF=true
 
 
@@ -114,4 +120,3 @@ export PATH=$PATH:/home/djella/.spicetify
 # =============================================================================
 autoload -U is-at-least
 # To initialize zoxide, add this to your configuration (usually ~/.zshrc):
-eval "$(zoxide init zsh)"
