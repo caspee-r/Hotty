@@ -57,185 +57,145 @@ return {
     },
 
     -- tmux-vim navigation
-    {
-        "christoomey/vim-tmux-navigator",
-        config = function()
-            vim.cmd([[
-            let g:tmux_navigator_save_on_switch = 1
-            let g:tmux_navigator_disable_when_zoomed = 1
-            let g:tmux_navigator_preserve_zoom = 1
-            let  g:tmux_navigator_no_wrap = 1
-            ]])
-        end,
-    },
+	{
+		"christoomey/vim-tmux-navigator",
+		cmd = {
+			"TmuxNavigateLeft",
+			"TmuxNavigateDown",
+			"TmuxNavigateUp",
+			"TmuxNavigateRight",
+			"TmuxNavigatePrevious",
+		},
+		keys = {
+			{ "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>" },
+			{ "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>" },
+			{ "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>" },
+			{ "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>" },
+			{ "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>" },
+		},
+	},
 
-    -- snippets
+	-- snippets
 	"rafamadriz/friendly-snippets", -- a bunch of snippets to use
 
-    -- autopairs
-    {
-        "windwp/nvim-autopairs",
-        event = "InsertEnter",
-        config = function()
-            local npairs = require("nvim-autopairs")
-            npairs.setup {
-                check_ts = true,
-                ts_config = {
-                    lua = { "string", "source" },
-                    javascript = { "string", "template_string" },
-                    java = false,
-                },
-                disable_filetype = { "TelescopePrompt", "spectre_panel" },
-                fast_wrap = {
-                    map = "<M-e>",
-                    chars = { "{", "[", "(", '"', "'" },
-                    pattern = string.gsub([[ [%'%"%)%>%]%)%}%,] ]], "%s+", ""),
-                    offset = 0, -- Offset from pattern match
-                    end_key = "$",
-                    keys = "qwertyuiopzxcvbnmasdfghjkl",
-                    check_comma = true,
-                    highlight = "PmenuSel",
-                    highlight_grey = "LineNr",
-                },
-            }
-
-            local cmp_autopairs = require "nvim-autopairs.completion.cmp"
-            local cmp_status_ok, cmp = pcall(require, "cmp")
-            if not cmp_status_ok then
-                return
-            end
-            cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done { map_char = { tex = "" } })
-        end
-    },
+	-- autopairs
+	{
+		'windwp/nvim-autopairs',
+		event = "InsertEnter",
+		config = true
+		-- use opts = {} for passing setup options
+		-- this is equalent to setup({}) function
+	},
 
 
-    -- nvim-surround
-    {
-        "kylechui/nvim-surround",
-        version = "*",
-        event = "VeryLazy",
-        config = function()
-            require("nvim-surround").setup({
-                -- Configuration here, or leave empty to use defaults
-            })
-        end
-    },
-    -- "tpope/vim-repeat",
+	-- nvim-surround
+	{
+		"kylechui/nvim-surround",
+		version = "*",
+		event = "VeryLazy",
+		config = function()
+			require("nvim-surround").setup({
+				-- Configuration here, or leave empty to use defaults
+			})
+		end
+	},
 
-    --Indentation
-    {
-        "lukas-reineke/indent-blankline.nvim",
-        event = "BufWinEnter",
-        main = "ibl",
-        config = function()
-            local ibl = require("ibl")
-            vim.cmd([[highlight IndentBlanklineIndent1 guifg=#0984ef gui=nocombine]])
+	--Indentation
+	{
+		"lukas-reineke/indent-blankline.nvim",
+		event = "BufWinEnter",
+		main = "ibl",
+		config = function()
+			local ibl = require("ibl")
+			vim.cmd([[highlight IndentBlanklineIndent1 guifg=#0984ef gui=nocombine]])
 
-            vim.cmd([[let g:indent_blankline_char='┆']])
+			vim.cmd([[let g:indent_blankline_char='┆']])
 
-            vim.opt.list = true
-            vim.opt.listchars:append("eol:↴")
+			vim.opt.list = true
+			vim.opt.listchars:append("eol:↴")
 
-            ibl.setup({
-                --show_end_of_line = true,
-                --show_current_context = true,
-                --show_current_context_start = true,
-                debounce = 100,
-                indent = {char = "|"},
-                whitespace = {
-                    highlight = { "Whitespace", "NonText" },
-                    remove_blankline_trail = true,
-            },
-                scope = {
-                    exclude = { language = { "lua" } },
-                    show_start = true,
-                    show_end = true,
-                    highlight = { "Function", "Label" },
+			ibl.setup({
+				--show_end_of_line = true,
+				--show_current_context = true,
+				--show_current_context_start = true,
+				debounce = 100,
+				indent = {char = "|"},
+				whitespace = {
+					highlight = { "Whitespace", "NonText" },
+					remove_blankline_trail = true,
+				},
+				scope = {
+					exclude = { language = { "lua" } },
+					show_start = true,
+					show_end = true,
+					highlight = { "Function", "Label" },
 
-                },
-
-
-            })
-        end
-    },
-
-    --NvimTree
-    {
-        "windwp/nvim-ts-autotag",
-        lazy = true,
-        opts = {
-            enable = true,
-            filetype = { "html", "xml", "python" },
-        },
-        ft = { "html", "xml", "python" },
-
-    },
+				},
 
 
-    {
-        "nvim-treesitter/nvim-treesitter-context",
---        event = "BufWinEnter",
-        opts = {
-            enable = true,         -- Enable this plugin (Can be enabled/disabled later via commands)
-            max_lines = 1,         -- How many lines the window should span. Values <= 0 mean no limit.
-            trim_scope = "outer",  -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
+			})
+		end
+	},
+
+	--NvimTree
+	{
+		"windwp/nvim-ts-autotag",
+		lazy = true,
+		opts = {
+			enable = true,
+			filetype = { "html", "xml", "python" },
+		},
+		ft = { "html", "xml", "python" },
+
+	},
+
+
+	{
+		"nvim-treesitter/nvim-treesitter-context",
+		--        event = "BufWinEnter",
+		opts = {
+			enable = true,         -- Enable this plugin (Can be enabled/disabled later via commands)
+			max_lines = 1,         -- How many lines the window should span. Values <= 0 mean no limit.
+			trim_scope = "outer",  -- Which context lines to discard if `max_lines` is exceeded. Choices: 'inner', 'outer'
 			line_numbers = true,
 			multiline_threshold = 20, -- Maximum number of lines to show for a single context
 			min_window_height = 0, -- Minimum editor window height to enable context. Values <= 0 mean no limit.
-            zindex = 20,     -- The Z-index of the context window
-            mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
-            -- Separator between context and content. Should be a single character string, like '-'.
-            -- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
-            separator = nil,
-            on_attach = nil,
+			zindex = 20,     -- The Z-index of the context window
+			mode = "cursor", -- Line used to calculate context. Choices: 'cursor', 'topline'
+			-- Separator between context and content. Should be a single character string, like '-'.
+			-- When separator is set, the context will only show up when there are at least 2 lines above cursorline.
+			separator = nil,
+			on_attach = nil,
 
-        }
-    },
-
-    -- buffdelete
-    {
-        "famiu/bufdelete.nvim",
-        keys = {
-            {
-                "<leader>bd",
-                "<cmd>:lua require('bufdelete').bufdelete(0, true)<cr>",
-                desc = "delete vim buffer without loosing the layout",
-            },
-        },
-    },
-
-    -- lualine
---    "nvim-lualine/lualine.nvim",
-
-    -- colorizer
-    {
-        "norcalli/nvim-colorizer.lua",
-        cmd = "ColorizerAttachToBuffer",
-        ft = "css",
-    },
-
-    -- telescope extension --
-    {
-        "nvim-telescope/telescope-fzf-native.nvim",
-        build = "make", -- fzf written in C,
-        lazy = true,
-    },
-
-    "kyazdani42/nvim-web-devicons", -- devicone
-    "lukas-reineke/cmp-rg",
-	-- markdown previewer
-	{
-		"toppair/peek.nvim",
-		event = { "VeryLazy" },
-		build = "deno task --quiet build:fast",
-		config = function()
-			require("peek").setup(
-				{ app ='webview', }
-			)
-			vim.api.nvim_create_user_command("PeekOpen", require("peek").open, {})
-			vim.api.nvim_create_user_command("PeekClose", require("peek").close, {})
-		end,
+		}
 	},
+
+	-- buffdelete
+	{
+		"famiu/bufdelete.nvim",
+		keys = {
+			{
+				"<leader>bd",
+				"<cmd>:lua require('bufdelete').bufdelete(0, true)<cr>",
+				desc = "delete vim buffer without loosing the layout",
+			},
+		},
+	},
+
+	-- lualine
+	--    "nvim-lualine/lualine.nvim",
+
+
+	-- telescope extension --
+	{
+		"nvim-telescope/telescope-fzf-native.nvim",
+		build = "make", -- fzf written in C,
+		lazy = true,
+	},
+
+	"kyazdani42/nvim-web-devicons", -- devicone
+	"lukas-reineke/cmp-rg",
+	-- markdown previewer
 
 	{
 		"folke/zen-mode.nvim",
@@ -309,11 +269,4 @@ return {
 		} },
 		lazy = true,
 	},
-	{
-		"nvim-telescope/telescope-bibtex.nvim",
-		config = function ()
-			require"telescope".load_extension("bibtex")
-		end,
-	},
-
 }

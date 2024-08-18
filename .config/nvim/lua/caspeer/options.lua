@@ -1,8 +1,7 @@
-vim.loader.enable()
+--vim.loader.enable()
 
-vim.cmd[[set path+=**]]
-vim.cmd[[set path+=~]]
-vim.cmd[[set path+=~]]
+vim.cmd[[set path+=*/**]]
+vim.cmd[[set path+=/usr/include/]]
 vim.cmd[[
 let g:netrw_keepdir = 0
 let g:netrw_browse_split = 0

@@ -13,12 +13,10 @@ keymap("", "<Space>", "<Nop>", opts)
 keymap("n", "<leader>e", ":Lexplore<CR>", term_opts)
 
 vim.keymap.set("i", "<C-c>", "<Esc>")
+vim.keymap.set("n", "<leader><CR>", ":w<CR>")
 
 
--- start lsp
 
--- zettelkasten 
-vim.keymap.set("n", "<leader>z", "<cmd>Telekasten panel<CR>")
 -- Most used functions
 vim.keymap.set("n", "<leader>zf", "<cmd>Telekasten find_notes<CR>")
 vim.keymap.set("n", "<leader>zg", "<cmd>Telekasten search_notes<CR>")
@@ -40,7 +38,6 @@ vim.keymap.set("i", "[[", "<cmd>Telekasten insert_link<CR>")
 --onoremap <silent> a, :<c-u>normal! F,ft,<cr>
 --]]
 --
---[[ vim.cmd [[ ]]
 --[[ map <C-H> <Nop> ]]
 --[[ ]]
 -- Modes
@@ -59,7 +56,7 @@ vim.keymap.set("i", "[[", "<cmd>Telekasten insert_link<CR>")
 --[[ keymap("n", "<C-l>", "<C-w>l", opts) ]]
 
 -- execute the last commands
-vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
+--vim.keymap.set("n", "<leader>pv", vim.cmd.Ex)
 
 -- greatest remap ever
 vim.keymap.set("x", "<leader>p", [["_dP]])
@@ -141,7 +138,7 @@ vim.api.nvim_create_autocmd('LspAttach',
 	end
 	}
 	)
-	-- Navigate buffers
+--	-- Navigate buffers
 
 -- Move text up and down
 keymap("n", "<A-k>", "<Esc>:m .-2<CR>==gi", opts)
