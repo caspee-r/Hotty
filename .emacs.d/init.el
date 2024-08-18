@@ -1,6 +1,27 @@
 ;; Startup Performance
 ;; The default is 800 kilobytes.  Measured in bytes.
 
+;; Package System Setup
+(require 'package)
+(setq package-archives '(
+                         ("melpa" .  "http://melpa.org/packages/")
+                         ("gnu" . "https://elpa.gnu.org/packages/")
+                         ("org" . "https://orgmode.org/elpa/")
+                         ))
+
+(eval-after-load 'gnutls
+  '(add-to-list 'gnutls-trustfiles "/etc/ssl/cert.pem"))
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+(eval-when-compile
+  (require 'use-package))
+
+
+(package-initialize)
+(unless package-archive-contents
+    (package-refresh-contents))
+
 (defconst user-init-dir
 		  (cond ((boundp 'user-emacs-directory)
 				 user-emacs-directory)
@@ -20,9 +41,9 @@
 
 (load-user-file "settings.el")
 (load-user-file "utils.el")
-;; (load-user-file "lsp.el")
+;;(load-user-file "lsp.el")
 ;; (load-user-file "evil.el")
-(load-user-file "org-mode.el")
+;;(load-user-file "org-mode.el")
 
 (defvar custom-tab-width 4 "the width of a tab character")
 
@@ -70,58 +91,25 @@
 					("C-c r" . winner-redo))
 			 )
 
-
-;; UI CONFIGURATION
-(setq inhibit-startup-message t)
-(tool-bar-mode -1) ;Disable the toolbar
-(menu-bar-mode -1);Disable the menu bar
-(scroll-bar-mode -1);Disable the scrolbar
-(tooltip-mode -1);Disable the toolbar
-
-
-;; (set-fringe-mode 10)  give some breathing room
-(set-face-attribute 'default nil :height 130)
-(set-face-background 'cursor "#c96")
+;;(set-face-background 'cursor "#c96")
 ;; (set-face-background 'default "#111")
-(set-face-background 'isearch "#ff0")
-(set-face-foreground 'isearch "#000")
+;;(set-face-background 'isearch "#ff0")
+;;(set-face-foreground 'isearch "#000")
 ;; (set-face-background 'lazy-highlight "#990")
 ;; (set-face-foreground 'lazy-highlight "#000")
-(set-face-foreground 'font-lock-comment-face "#fc0")
+;;(set-face-foreground 'font-lock-comment-face "#fc0")
 
 ;; show trailing whitespace
 ;; (setq-default show-trailing-whitespace t)
-(setq-default indicate-empty-lines t)
-(setq-default require-final-newline t)
-;; Single Space for Sentence Spacing
-(setq sentence-end-double-space nil)
 
-(setq-default indent-tabs-mode t)
-
-(setq c-basic-offset 4)
-
-(setq show-paren-delay 0)
 (show-paren-mode)
-(setq warning-minimum-level :emergency)
-;; Set up the visible bell
-(setq visible-bell t)
 (column-number-mode)
 ;; Set frame transparency
-(defvar efs/frame-transparency '(90 . 90))
-(set-frame-parameter (selected-frame) 'alpha efs/frame-transparency)
-(add-to-list 'default-frame-alist `(alpha . ,efs/frame-transparency))
-(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
-(add-to-list 'default-frame-alist '(fullscreen . maximized))
-
-
-
-
-
-;; relative numbers
-(setq display-line-numbers-type 'relative
-	  display-line-numbers-width-start t
-
-	  )
+;;(defvar caspeer/frame-transparency '(90 . 90))
+;;(set-frame-parameter (selected-frame) 'alpha caspeer/frame-transparency)
+;;(add-to-list 'default-frame-alist `(alpha . ,caspeer/frame-transparency))
+;;(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+;;(add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 ;; line-mode
 ;; numbers for programming mode
@@ -149,7 +137,8 @@
 
 ;; a nice package for coloring ([{
 (use-package rainbow-delimiters
-			 :hook (prog-mode . rainbow-delimiters-mode))
+    :ensure t
+    :hook (prog-mode . rainbow-delimiters-mode))
 
 ;; Term Mode -----------------------------------------
 (use-package eterm-256color
@@ -213,22 +202,22 @@
 ;;     (ivy-prescient-mode 1)
 ;;     )
 
-(use-package vertico
-			 :ensure t
-			 :config
-			 (vertico-mode 1)
-			 (vertico-prescient-mode 1)
-
-			 )
-
-(use-package vertico-prescient
-			 :ensure t
-			 )
-
-(use-package prescient
-			 :ensure t
-			 )
-
+;;(use-package vertico
+;;			 :ensure t
+;;			 :config
+;;			 (vertico-mode 1)
+;;			 (vertico-prescient-mode 1)
+;;
+;;			 )
+;;
+;;(use-package vertico-prescient
+;;			 :ensure t
+;;			 )
+;;
+;;(use-package prescient
+;;			 :ensure t
+;;			 )
+;;
 
 
 (use-package helpful
@@ -249,11 +238,16 @@
 ;; is useful for displaying a panel showing each key binding you use in a panel on the right side of the frame.  Great for live streams and screencasts!
 
 
+(use-package multiple-cursors
+	:ensure t
+	)
 
-
-
-
-
+(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+(global-set-key (kbd "C->")         'mc/mark-next-like-this)
+(global-set-key (kbd "C-<")         'mc/mark-previous-like-this)
+(global-set-key (kbd "C-c C-<")     'mc/mark-all-like-this)
+(global-set-key (kbd "C-\"")        'mc/skip-to-next-like-this)
+(global-set-key (kbd "C-:")         'mc/skip-to-previous-like-this)
 
 
 ;; MAGIT
@@ -263,21 +257,34 @@
 			 :custom
 			 (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
+(defun recentf-ido-find-file ()
+  "Use ido to select a recently opened file from the `recentf-list'"
+  (interactive)
+  (find-file
+   (ido-completing-read "Recentf open: "
+                        (mapcar 'abbreviate-file-name recentf-list)
+                        nil t)))
+
+
+
 (use-package recentf
 			 :init
 			 (setq recentf-max-menu-items 25
 				   recentf-auto-cleanup 'never
+				   ido-use-virtual-buffers t
 				   recentf-keep '(file-remote-p file-readable-p))
 			 (recentf-mode 1)
 			 (let ((last-ido "~/.cache/emacs/ido.last"))
 			   (when (file-exists-p last-ido)
 				 (delete-file last-ido)))
-			 :bind ("C-c f r" . recentf)
+			 :bind ("C-c f r" . recentf-ido-find-file
+					)
 			 )
 
 (electric-pair-mode 1)
 
 ;; Dired ------------------------
+(require 'dired-x)
 (use-package dired
 			 :ensure nil
 			 :hook ('dired-mode-hook 'auto-revert-mode)
@@ -315,29 +322,38 @@
 ;; 	:bind
 ;; 	)
 
-;; (use-package ido
-;;     :init
-;;     (setq ido-enable-flex-matching t
-;; 		  ido-auto-merge-work-directories-length -1
-;; 		  ido-create-new-buffer 'always
-;; 		  ido-use-filename-at-point 'guess
-;; 		  ido-everywhere t
-;; 		  ido-default-buffer-method 'selected-window)
-;;     :config
-;;     (ido-mode 1)
-;;     (ido-everywhere 1)
-;;     (put 'ido-exit-minibuffer 'disabled nil)
-;;     (when (require 'ido-ubiquitous nil t)
-;; 		(ido-ubiquitous-mode 1))
-;;     (fido-mode 1)
-;;     )
+ (use-package ido
+     :init
+     (setq ido-enable-flex-matching t
+ 		  ido-auto-merge-work-directories-length -1
+ 		  ido-create-new-buffer 'always
+ 		  ido-use-filename-at-point 'guess
+ 		  ido-everywhere t
+ 		  ido-default-buffer-method 'selected-window)
+     :config
+     (ido-mode 1)
+     (ido-everywhere 1)
+     (put 'ido-exit-minibuffer 'disabled nil)
+     (when (require 'ido-ubiquitous nil t)
+ 		(ido-ubiquitous-mode 1))
+     (fido-mode 1)
+     )
 
-;; (use-package flx-ido
-;;     :ensure t
-;;     :init (setq ido-enable-flex-matching t
-;;                 ido-use-faces nil)
-;;     :config (flx-ido-mode 1)
-;;     )
+(use-package smex
+	:ensure t)
+  (global-set-key (kbd "M-x") 'smex)
+  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
+  ;; This is your old M-x.
+  (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
+
+
+
+ (use-package flx-ido
+     :ensure t
+     :init (setq ido-enable-flex-matching t
+                 ido-use-faces nil)
+     :config (flx-ido-mode 1)
+     )
 
 
 ;; (use-package icomplete-vertical
@@ -462,6 +478,15 @@
 
 
 ;; Languages
+
+(use-package c-mode
+	:config
+	(setq c-default-style "linux"
+		  c-basic-offset 4
+		  )
+	)
+
+
 (use-package python-mode
 			 :ensure t
 			 :hook (python-mode . lsp)
@@ -471,17 +496,6 @@
 (use-package zig-mode
 	:config
 	(setq zig-format-on-save 'nil)
-	)
-
-;;Lispy
-( use-package lispy
-	:init
-	(add-hook 'lisp-interaction-mode-hook 'lispy-mode)
-	(add-hook 'eval-expression-minibuffer-setup-hook 'lispy-mode)
-	:hook ((emacs-lisp-mode ielm-mode lisp-interaction-mode ) . lispy-mode)
-	:config
-	(lispy-mode t)
-
 	)
 
 (use-package doc-view
@@ -494,21 +508,6 @@
 			   )
 			 )
 
-(use-package khoj
-			 :ensure t
-			 :bind ("C-c s" . 'khoj)
-			 :config
-			 (setq
-			   khoj-api-key "kk-RYncqQRadfI-5elNGk9RGQY50wScJ_knoMLM58WClDg"
-			   khoj-auto-index t
-			   khoj-auto-setup t
-			   khoj-org-directories '("~/org/zettle")
-			   khoj-org-files '("~/org/inbox.org")
-			   )
-			 )
-
-(global-set-key (kbd "C-c C-i") 'iedit-mode)
-
 (use-package undo-tree
 			 :ensure t
 			 :hook
@@ -520,7 +519,6 @@
 			  )
 			 )
 
-(use-package zotxt)
 
 ;; compilation mode
 (require 'compile)
@@ -541,7 +539,7 @@
 	  (setq w (get-buffer-window "*compilation*"))
 	  (select-window w)
 	  (setq h (window-height w))
-	  (shrink-window (- h 9))
+	  (shrink-window (- h 14))
 
 	  )
 	))
@@ -561,7 +559,7 @@
 							 (file-name-sans-extension file)
 							 file))))))
 
-(setq compilation-scroll-output 'first-error)
+
 (defun caspeer/compilation-finish-function (buffer status)
   "Bring the compilation window into focus if there are errors."
   (if (and (string-prefix-p "*compilation" (buffer-name buffer))
@@ -634,7 +632,6 @@
   )
 
 (global-set-key (kbd "C-c d") 'caspeer/rm-this-file)
-(global-set-key (kbd "C-c / ") 'duplicate-line)
 (global-set-key (kbd "C-c <insert>") 'insert-char)
 
 (defun caspeer/half-scroll-up ()
@@ -678,6 +675,22 @@
 
 
 (global-set-key (kbd "C-x |") 'toggle-window-split)
+(global-set-key (kbd "C-c w i") 'imenu)
+(defun caspeer/duplicate-line ()
+  "Duplicate current line"
+  (interactive)
+  (let ((column (- (point) (point-at-bol)))
+        (line (let ((s (thing-at-point 'line t)))
+                (if s (string-remove-suffix "\n" s) ""))))
+    (move-end-of-line 1)
+    (newline)
+    (insert line)
+    (move-beginning-of-line 1)
+    (forward-char column)))
+
+(global-set-key (kbd "C-,") 'caspeer/duplicate-line)
+
+
 
 
 ;; (defadvice text-scale-increase (around all-buffers (arg) activate)
@@ -721,28 +734,28 @@
 			 ad-do-it))
 
 
-(use-package treesit-auto
-			 :config
-			 (treesit-auto-add-to-auto-mode-alist 'all)
-			 (setq
-			   treesit-auto-install-all t)
-			 )
+;;(use-package treesit-auto
+;;			 :config
+;;			 (treesit-auto-add-to-auto-mode-alist 'all)
+;;			 (setq
+;;			   treesit-auto-install-all t)
+;;			 )
 
-(setq treesit-language-source-alist
-	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-		(cmake "https://github.com/uyha/tree-sitter-cmake")
-		(css "https://github.com/tree-sitter/tree-sitter-css")
-		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
-		(go "https://github.com/tree-sitter/tree-sitter-go")
-		(html "https://github.com/tree-sitter/tree-sitter-html")
-		(c "https://github.com/tree-sitter/tree-sitter-c")
-		(python "https://github.com/tree-sitter/tree-sitter-python")
-		(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-		(gas "https://github.com/sirius94/tree-sitter-gas")
-		(ada "https://github.com/briot/tree-sitter-ada")
-		)
-	  )
-(setq	treesit-font-lock-level 4)
+;;(setq treesit-language-source-alist
+;;	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
+;;		(cmake "https://github.com/uyha/tree-sitter-cmake")
+;;		(css "https://github.com/tree-sitter/tree-sitter-css")
+;;		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
+;;		(go "https://github.com/tree-sitter/tree-sitter-go")
+;;		(html "https://github.com/tree-sitter/tree-sitter-html")
+;;		(c "https://github.com/tree-sitter/tree-sitter-c")
+;;		(python "https://github.com/tree-sitter/tree-sitter-python")
+;;		(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
+;;		(gas "https://github.com/sirius94/tree-sitter-gas")
+;;		(ada "https://github.com/briot/tree-sitter-ada")
+;;		)
+;;	  )
+;;(setq	treesit-font-lock-level 4)
 ;; (setq major-mode-remap-alist
 ;; 	  '(
 ;; 		(asm-mode . gas-ts-mode)
@@ -753,8 +766,7 @@
 			   "Discard all themes before loading new."
 			   (mapc #'disable-theme custom-enabled-themes))
 
-
-(load-theme 'almost-mono-gray )
+(load-theme 'kanagawa )
 (put 'upcase-region 'disabled nil)
 (mouse-avoidance-mode 'jump)
 
@@ -764,6 +776,16 @@
 		 (display-buffer-in-direction)
 		 (direction . right)
 		 (window-width . 0.40)
+		 )
+		("\\*compilation\\*"
+		 (display-buffer-in-direction)
+		 (direction . down)
+		 (window-width . 0.40)
+		 )
+		("\\*grep\\*"
+		 (display-buffer-in-direction)
+		 (direction . down)
+		 (window-height . 0.50)
 		 )
 		)
 	  )

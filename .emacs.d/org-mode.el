@@ -117,6 +117,8 @@
 	(interactive)
 	(org-capture nil "i")
 	)
+(use-package org-modern
+    :ensure t)
 
 (use-package org
     :commands (org-capture org-agenda)
@@ -194,6 +196,7 @@
     (visual-fill-column-mode 1))
 
 (use-package visual-fill-column
+    :ensure t
     :hook (org-mode . caspeer/org-mode-visual-fill))
 
 

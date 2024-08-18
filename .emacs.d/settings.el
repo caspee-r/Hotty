@@ -1,26 +1,18 @@
-;; Package System Setup
-(require 'package)
-(setq package-archives '(
-                         ("melpa" .  "http://melpa.org/packages/")
-                         ("gnu" . "https://elpa.gnu.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ))
-
-(package-initialize)
-
-(unless package-archive-contents
-    (package-refresh-contents))
-(require 'use-package)
-(setq use-package-always-ensure t)
-
-
-;; Runtime Performance
-
 ;; helps to keep .emacs.d clean
 (make-directory (expand-file-name ".tmp/auto-saves/" user-emacs-directory) t)
 (setq auto-save-list-file-prefix (expand-file-name ".tmp/auto-saves/sessions/" user-emacs-directory)
 	  auto-save-file-name-transforms `((".*" ,(expand-file-name ".tmp/auto-saves/" user-emacs-directory) t)))
 (setq backup-directory-alist `(("." . ,(expand-file-name ".tmp/backups/" user-emacs-directory))))
+
+;; Font Familly
+(set-face-attribute 'default nil :font "Iosevka" :height 150)
+
+;; UI CONFIGURATION
+(setq inhibit-startup-message t)
+(tool-bar-mode -1) ;Disable the toolbar
+(menu-bar-mode -1);Disable the menu bar
+(scroll-bar-mode -1);Disable the scrolbar
+(tooltip-mode -1);Disable the toolbar
 
 
 
@@ -44,14 +36,24 @@
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
+(setq-default indicate-empty-lines t)
+(setq-default require-final-newline t)
+(setq-default indent-tabs-mode t)
 
 (setq history-length 25
-      debug-on-error t
-	  scroll-margin 6
-	  scroll-step 6
-	  scroll-conservatively 999
-      initial-scratch-message ";;Who The Fuck R U ??\n" ;; Uh, I know what Scratch is for
-      save-interprogram-paste-before-kill t
+	  show-paren-delay 0
+	  debug-on-error t
+	  warning-minimum-level :emergency
+	  visible-bell t
+	  display-line-numbers-type 'relative
+	  display-line-numbers-width-start t
+	  redisplay-dont-pause t
+	  scroll-margin 1
+	  scroll-step 1
+	  scroll-preserve-screen-position 1
+	  scroll-conservatively 1000
+	  initial-scratch-message ";;Who The Fuck R U ??\n" ;; Uh, I know what Scratch is for
+	  save-interprogram-paste-before-kill t
       apropos-do-all t
       mouse-yank-at-point t
       require-final-newline t
@@ -62,6 +64,10 @@
       next-line-add-newlines t
 	  switch-to-buffer-obey-display-actions t
 	  list-matching-lines-default-context-lines 3
+	  use-dialog-box nil
+	  compilation-scroll-output t
+	  xref-prompt-for-identifier nil
+	  sentence-end-double-space nil
 	  )
 
 (setq create-lockfiles nil)
@@ -77,10 +83,5 @@
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 
-(require 'server)
-(require 'treesit)
-
-
-
-
-
+;;(require 'server)
+;;(require 'treesit)
