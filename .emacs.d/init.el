@@ -317,43 +317,71 @@
 (setq register-preview-delay 0)
 
 
-;; (use-package dired-hide-dotfiles
-;;     :hook (dired-mode . dired-hide-dotfiles-mode)
-;; 	:bind
-;; 	)
+(use-package helm
+	 :init
+	 (custom-set-variables '(helm-command-prefix-key "C-;"))
+	:config
+	(setq
+	 helm-input-idle-delay					   0.01
+	 helm-idle-delay                           0.01
+	 helm-quick-update                         t
+	 helm-reuse-last-window-split-state		   t
+	 helm-split-window-default-side            'other
+	 helm-always-two-windows				   t
+	 helm-split-window-inside-p				   t
+	 helm-mode-fuzzy-match					   t
+	 helm-completion-in-region-fuzzy-match     t
+	 helm-follow-mode-persistent               t
+	 completions-detailed                      t
+	 history-delete-duplicates                 t
+	 helm-ff-search-library-in-sexp            t
+	 helm-ff-file-name-history-use-recentf     t
+	 helm-buffers-fuzzy-matching               t
+	 ido-use-virtual-buffers                   t
+	 )
+	(helm-mode 1)
+	:bind
+	(
+	 (:map helm-map
+		   ("C-o" . nil)
+           ("TAB" . helm-execute-persistent-action)
+           ("C-i" . helm-execute-persistent-action)
+           ("C-z" . helm-select-action)
+ 		   )
+	 (:map global-map ("M-x" . 'helm-M-x)
+	 ("M-y" . 'helm-show-kill-ring)
+	 ("C-x C-f" . 'helm-find-files)
+	 ("C-x b" . 'helm-buffers-list))
+	 )
+	)
 
- (use-package ido
-     :init
-     (setq ido-enable-flex-matching t
- 		  ido-auto-merge-work-directories-length -1
- 		  ido-create-new-buffer 'always
- 		  ido-use-filename-at-point 'guess
- 		  ido-everywhere t
- 		  ido-default-buffer-method 'selected-window)
-     :config
-     (ido-mode 1)
-     (ido-everywhere 1)
-     (put 'ido-exit-minibuffer 'disabled nil)
-     (when (require 'ido-ubiquitous nil t)
- 		(ido-ubiquitous-mode 1))
-     (fido-mode 1)
-     )
-
-(use-package smex
-	:ensure t)
-  (global-set-key (kbd "M-x") 'smex)
-  (global-set-key (kbd "M-X") 'smex-major-mode-commands)
-  ;; This is your old M-x.
-  (global-set-key (kbd "C-c C-c M-x") 'execute-extended-command)
 
 
+;; (use-package ido
+;;     :init
+;;     (setq ido-enable-flex-matching t
+;; 		  ido-auto-merge-work-directories-length -1
+;; 		  ido-create-new-buffer 'always
+;; 		  ido-use-filename-at-point 'guess
+;; 		  ido-everywhere t
+;; 		  ido-default-buffer-method 'selected-window)
+;;     :config
+;;     (ido-mode 1)
+;;     (ido-everywhere 1)
+;;     (put 'ido-exit-minibuffer 'disabled nil)
+;;     (when (require 'ido-ubiquitous nil t)
+;; 		(ido-ubiquitous-mode 1))
+;;     (fido-mode 1)
+;;
+;;     )
 
- (use-package flx-ido
-     :ensure t
-     :init (setq ido-enable-flex-matching t
-                 ido-use-faces nil)
-     :config (flx-ido-mode 1)
-     )
+
+;; (use-package flx-ido
+;;     :ensure t
+;;     :init (setq ido-enable-flex-matching t
+;;                 ido-use-faces nil)
+;;     :config (flx-ido-mode 1)
+;;     )
 
 
 ;; (use-package icomplete-vertical
