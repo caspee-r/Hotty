@@ -5,7 +5,7 @@
 (setq backup-directory-alist `(("." . ,(expand-file-name ".tmp/backups/" user-emacs-directory))))
 
 ;; Font Familly
-(set-face-attribute 'default nil :font "Iosevka" :height 150)
+(set-face-attribute 'default nil :font "Iosevka Term" :height 150)
 
 ;; UI CONFIGURATION
 (setq inhibit-startup-message t)
@@ -50,9 +50,9 @@
 	  redisplay-dont-pause t
 	  scroll-margin 1
 	  scroll-step 1
-	  scroll-preserve-screen-position 1
+	  scroll-preserve-screen-position 'always
 	  scroll-conservatively 1000
-	  initial-scratch-message ";;Who The Fuck R U ??\n" ;; Uh, I know what Scratch is for
+	  initial-scratch-message ";; CASPEER"
 	  save-interprogram-paste-before-kill t
       apropos-do-all t
       mouse-yank-at-point t
@@ -80,8 +80,4 @@
 (setq bookmark-save-flag t
 	  bookmark-default-file "/home/caspeer/.cache/emacs/bookmarks")
 
-(require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
-
-;;(require 'server)
-;;(require 'treesit)
