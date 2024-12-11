@@ -44,7 +44,7 @@
 ;;(load-user-file "lsp.el")
 ;; (load-user-file "evil.el")
 ;;(load-user-file "org-mode.el")
-
+(add-hook 'org-mode-hook (load-user-file "org-mode.el"))
 (defvar custom-tab-width 4 "the width of a tab character")
 
 (defun disable-tabs () (setq indent-tabs-mode nil))
@@ -61,8 +61,8 @@
 
 ;; (global-set-key (kbd "TAB") 'tab-to-tab-stop)
 
-(setq c-ts-mode-indent-offset custom-tab-width)
-(add-hook 'c-ts-mode-hook 'subword-mode)
+(setq c-mode-indent-offset custom-tab-width)
+(add-hook 'c-mode-hook 'subword-mode)
 (setq backward-delete-char-untabify-method 'hungry)
 
 
@@ -82,6 +82,11 @@
 
 (use-package no-littering
 			 :ensure t)
+
+(use-package expand-region
+	:bind
+	("C-=" . 'er/expand-region)
+	)
 
 (use-package winner
 			 :init
@@ -131,11 +136,7 @@
 (global-set-key [(control x) (k)] 'kill-this-buffer)
 ;-----------
 
-;; icons package
-;; (use-package all-the-icons)
-
-
-;; a nice package for coloring ([{
+;; a nice package for coloring
 (use-package rainbow-delimiters
     :ensure t
     :hook (prog-mode . rainbow-delimiters-mode))
@@ -153,55 +154,8 @@
 			 ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
 			 (setq vterm-max-scrollback 10000))
 
-
-
-;; Ivy and Counsel Configuration -----------------------------------------------------------
-
-;; (use-package ivy
-;;     :bind (("C-s" . swiper)
-;;            :map ivy-minibuffer-map
-;;            ("TAB" . ivy-alt-done)
-;;            ("C-l" . ivy-alt-done)
-;;            ("C-j" . ivy-next-line)
-;;            ("C-k" . ivy-previous-line)
-;;            :map ivy-switch-buffer-map
-;;            ("C-k" . ivy-previous-line)
-;;            ("C-l" . ivy-done)
-;;            ("C-d" . ivy-switch-buffer-kill)
-;;            :map ivy-reverse-i-search-map
-;;            ("C-k" . ivy-previous-line)
-;;            ("C-d" . ivy-reverse-i-search-kill))
-;;     :config
-;;     (ivy-mode 1)
-;;     (setq ivy-use-virtual-buffers t
-;; 	  ivy-count-format "%d/%d "))
-
-;; (use-package ivy-rich
-;;     :after ivy
-;;     :init
-;;     (ivy-rich-mode 1))
-
-;; (use-package counsel
-;;     :bind (("M-x" . counsel-M-x)
-;;            ("C-x b" . counsel-ibuffer)
-;;            ("C-x C-f" . counsel-find-file)
-;;            :map minibuffer-local-map
-;;            ("C-r" . 'counsel-minibuffer-history))
-;;     :custom
-;;     (counsel-linux-app-format-function #'counsel-linux-app-format-function-name-only)
-;;     :config
-;;     (counsel-mode 1))
-
-;; (use-package ivy-prescient
-;;     :after counsel
-;;     :custom
-;;     (ivy-prescient-enable-filtering nil)
-;;     :config
-;;     ;; Uncomment the following line to have sorting remembered across sessions!
-;; 					;(prescient-persist-mode 1)
-;;     (ivy-prescient-mode 1)
-;;     )
-
+;;
+;;
 ;;(use-package vertico
 ;;			 :ensure t
 ;;			 :config
@@ -214,20 +168,9 @@
 ;;			 :ensure t
 ;;			 )
 ;;
-;;(use-package prescient
-;;			 :ensure t
-;;			 )
-;;
-
-
-(use-package helpful
-			 :commands (helpful-callable helpful-variable helpful-command helpful-key)
-			 :bind
-			 ([remap describe-function] . helpful-function)
-			 ([remap describe-command] . helpful-command)
-			 ([remap describe-variable] . helpful-variable)
-			 ([remap describe-key] . helpful-key))
-
+(use-package prescient
+	:ensure t
+	)
 
 ;; Which Key??
 (use-package which-key
@@ -257,31 +200,52 @@
 			 :custom
 			 (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-(defun recentf-ido-find-file ()
-  "Use ido to select a recently opened file from the `recentf-list'"
+(defun filter-symbolic-links (paths)
+  "Return a new list from PATHS with duplicates removed where files and symbolic links point to the same file."
+  (let ((unique-paths '()))
+    (dolist (path paths)
+      (let ((true-path (file-truename path)))
+        ;; Only add the path if its true path is not already in the unique-paths list
+        (unless (member true-path unique-paths)
+          (push true-path unique-paths))))
+    ;; Return the unique paths as a new list in the original order
+    (nreverse unique-paths)))
+
+(defun recentf-find-file (&optional filter)
+  "Find a recent file using `completing-read'.
+When optional argument FILTER is a function, it is used to
+transform recent files before completion."
   (interactive)
-  (find-file
-   (ido-completing-read "Recentf open: "
-                        (mapcar 'abbreviate-file-name recentf-list)
-                        nil t)))
-
-
+  (let* ((filter (if (functionp filter) filter #'abbreviate-file-name))
+         (file (completing-read "Choose recent file: "
+                                (delete-dups (mapcar filter recentf-list))
+                                nil t)))
+    (when file
+      (find-file file))))
 
 (use-package recentf
-			 :init
-			 (setq recentf-max-menu-items 25
-				   recentf-auto-cleanup 'never
-				   ido-use-virtual-buffers t
-				   recentf-keep '(file-remote-p file-readable-p))
-			 (recentf-mode 1)
-			 (let ((last-ido "~/.cache/emacs/ido.last"))
-			   (when (file-exists-p last-ido)
-				 (delete-file last-ido)))
-			 :bind ("C-c f r" . recentf-ido-find-file
-					)
-			 )
+	:ensure nil
+	:config
+	(setq recentf-max-menu-items 20
+		  recentf-max-saved-items 100
+		  recentf-keep '(file-remote-p file-readable-p file-exists-p)
+		  )
+	(recentf-mode t)
+	:bind ("C-c f r" . 'recentf-find-file)
+	)
 
 (electric-pair-mode 1)
+
+;; Global HOOKS
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
+(set-face-attribute 'fill-column-indicator   nil :foreground "#6fa855" :background nil)
+(setq
+ fill-column 90
+ global-display-fill-column-indicator-character ?█
+ global-display-fill-column-indicator-modes '(prog-mode)
+											  )
+;(global-display-fill-column-indicator-mode t)
 
 ;; Dired ------------------------
 (require 'dired-x)
@@ -397,46 +361,17 @@
           (lambda ()
             (setq-local yas--major-mode 'c-mode)
             (yas-activate-extra-mode 'c-mode)))
+	:bind
+  (:map yas-minor-mode-map
+        ("C-'". yas-expand)
+        ([(tab)] . nil)
+        ("TAB" . nil))
 
 	:config
 	(yas-global-mode 1)
 	)
 (use-package yasnippet-snippets
 			 :ensure t)
-
-
-;; (use-package company
-;; 	:defer 0.1
-;;     :hook ((prog-mode lsp-mode) . company-mode)
-;;     :bind (:map company-active-map
-;; 				("<Tab>" . company-complete-selection)
-;; 				("C-c h" . #'company-quickhelp-manual-begin)
-;; 				)
-;;     :custom
-;;     (company-minimum-prefix-length 1)
-;;     (company-idle-delay 0.0)
-;;     :config
-;; 	(company-prescient-mode)
-;;     (setq company-selection-wrap-around t)
-;; 	(setq company-format-margin-function #'company-vscode-dark-icons-margin)
-;; 	(setq company-backends
-;; 		  '((
-;; 			 :separate
-;; 			 company-yasnippet
-;; 			 company-dabbrev
-;; 	 		 company-capf
-;; 			 company-files
-;; 			 company-keywords
-;; 			 company-semantic
-;; 			 ))
-;; 		  )
-;; 	)
-;; (use-package company-quickhelp
-;;     :after company
-;;     :hook (company-mode . company-quickhelp-mode )
-
-;;      )
-
 
 (use-package corfu
 	:ensure t
@@ -447,7 +382,7 @@
 				  ("<return>" . 'corfu-insert)
 				  ("M-d" .  'corfu-show-documentation)
 				  ("M-l" . 'corfu-show-location)
-				  )	 
+				  )
 	:init
 	(global-corfu-mode)
 	:config
@@ -465,7 +400,7 @@
           corfu-count 16
           corfu-max-width 120
           corfu-on-exact-match nil
-          tab-always-indent 'complete
+          tab-always-indent t
 		  corfu-show-documentation t
 		  corfu-quit-at-boundary 'seperator
 		  )
@@ -496,30 +431,13 @@
 	(add-to-list 'completion-at-point-functions (cape-company-to-capf #'company-yasnippet))
 	;; (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
 	)
-	
-
-;; (use-package company-prescient
-;; 	:ensure t
-;; 	)
-
-
 
 
 ;; Languages
 
-(use-package c-mode
-	:config
-	(setq c-default-style "linux"
-		  c-basic-offset 4
-		  )
-	)
-
-
-(use-package python-mode
-			 :ensure t
-			 :hook (python-mode . lsp)
-			 :custom
-			 (python-shell-interpreter "python3"))
+(setq
+ c-basic-offset 4
+ )
 
 (use-package zig-mode
 	:config
@@ -548,32 +466,9 @@
 			 )
 
 
-;; compilation mode
-(require 'compile)
+(global-set-key [f9] 'compile)
 
-(defun my-recompile ()
-  "Run compile and resize the compile window closing the old one if necessary"
-  (interactive)
-  (progn
-	(if (get-buffer "*compilation*") ; If old compile window exists
-	  (progn
-		(delete-windows-on (get-buffer "*compilation*")) ; Delete the compilation windows
-		(kill-buffer "*compilation*") ; and kill the buffers
-		)
-	  )
-	(progn
-	  (call-interactively 'compile)
-	  (setq cur (selected-window))
-	  (setq w (get-buffer-window "*compilation*"))
-	  (select-window w)
-	  (setq h (window-height w))
-	  (shrink-window (- h 14))
-
-	  )
-	))
-(global-set-key [f9] 'my-recompile)
-
-(add-hook 'c-ts-mode-hook
+(add-hook 'c-mode-hook
 		  (lambda ()
 			(unless (file-exists-p "Makefile")
 			  (set (make-local-variable 'compile-command)
@@ -582,7 +477,7 @@
 				   ;; variables:
 				   ;; $(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $<
 				   (let ((file (file-name-nondirectory buffer-file-name)))
-					 (format "%s -o %s.o %s"
+					 (format "%s -o %s %s"
 							 (or (getenv "CC") "gcc")
 							 (file-name-sans-extension file)
 							 file))))))
@@ -597,11 +492,13 @@
 ;; Add the function to the compilation-finish-functions variable
 (add-hook 'compilation-finish-functions 'caspeer/compilation-finish-function)
 
-(defun my-compilation-mode-hook ()
-  ;; Jump at the right column even for tab indentation
-  (setq compilation-error-screen-columns nil)
-  )
-(add-hook 'compilation-mode-hook 'my-compilation-mode-hook)
+;;compilation
+
+(setq compilation-error-screen-columns nil
+	  compilation-auto-jump-to-first-error t
+	  )
+
+
 
 
 (defun move-region (start end n)
@@ -673,8 +570,8 @@
 	(interactive)
 	 (scroll-down-command (-  (/ (window-size) 2) 5)))
 
-(global-set-key (kbd "C-v") 'caspeer/half-scroll-up)
-(global-set-key (kbd "M-v") 'caspeer/half-scroll-down)
+;;(global-set-key (kbd "C-v") 'caspeer/half-scroll-up)
+;;(global-set-key (kbd "M-v") 'caspeer/half-scroll-down)
 
 (defun toggle-window-split ()
   (interactive)
@@ -717,14 +614,7 @@
     (forward-char column)))
 
 (global-set-key (kbd "C-,") 'caspeer/duplicate-line)
-
-
-
-
-;; (defadvice text-scale-increase (around all-buffers (arg) activate)
-;; 	(dolist (buffer (buffer-list))
-;; 		(with-current-buffer buffer
-;; 			ad-do-it)))
+(global-set-key (kbd "C-c f o") 'ff-find-other-file)
 
 (defadvice kill-line (before kill-line-autoreindent activate)
 	"Kill excess whitespace when joining lines.
@@ -761,6 +651,43 @@
 			   (kill-backward-chars 1))
 			 ad-do-it))
 
+(use-package rfc-mode)
+
+(use-package mu4e
+	:ensure nil
+	:config
+	(setq mu4e-change-filenames-when-moving t
+		  mu4e-update-interval (* 10 60)
+		  mu4e-get-mail-command "mbsync -a"
+		  mu4e-mail-dir "~/.mail/gmail"
+		  mu4e-drafts-folder "/[Gmail].Drafts"
+		  mu4e-sent-folder "/[Gmail].Sent Mail"
+		  mu4e-refile-folder "/[Gmail].All Mail"
+		  mu4e-trash-folder "/[Gmail].Trash"
+		  )
+	(setq mu4e-maildir-shortcuts
+		  '(
+			("/Inbox" . ?i)
+			("/[Gmail].Drafts" . ?d)
+			("/[Gmail].Sent Mail" . ?s)
+			("/[Gmail].All Mail" . ?a)
+			("/[Gmail].Trash" . ?t)
+			)
+
+		  )
+
+	)
+
+;; Project
+(defun project-find-c-src (dir)
+	(when-let ((root (locate-dominating-file dir "Makefile")))
+		(cons 'c-src root)))
+
+(cl-defmethod project-root ((project (head c-src)))
+	(cdr project)
+	)
+
+(add-hook 'project-find-functions #'project-find-c-src)
 
 ;;(use-package treesit-auto
 ;;			 :config
@@ -790,24 +717,16 @@
 ;; 		)
 ;; 	  )
 
-(define-advice load-theme (:before (&rest _args) theme-dont-propagate)
-			   "Discard all themes before loading new."
-			   (mapc #'disable-theme custom-enabled-themes))
 
-(load-theme 'kanagawa )
 (put 'upcase-region 'disabled nil)
 (mouse-avoidance-mode 'jump)
 
 (setq display-buffer-alist
 	  '(
+
 		("\\*undo-tree\\*"
 		 (display-buffer-in-direction)
 		 (direction . right)
-		 (window-width . 0.40)
-		 )
-		("\\*compilation\\*"
-		 (display-buffer-in-direction)
-		 (direction . down)
 		 (window-width . 0.40)
 		 )
 		("\\*grep\\*"
@@ -815,6 +734,18 @@
 		 (direction . down)
 		 (window-height . 0.50)
 		 )
+		("\\*compilation\\*"
+		 (display-buffer-in-direction)
+		 (direction . down)
+		 (window-height . 0.30)
+		 )
 		)
 	  )
 (put 'dired-find-alternate-file 'disabled nil)
+(put 'downcase-region 'disabled nil)
+
+(define-advice load-theme (:before (&rest _args) theme-dont-propagate)
+			   "Discard all themes before loading new."
+			   (mapc #'disable-theme custom-enabled-themes))
+
+(load-theme 'gruber-darker )
