@@ -6,3 +6,5 @@
 /.emacs.d/etc/
 /.emacs.d/elpa/
 /.emacs.d/lisp/
+/.emacs.d/eln-cache/
+/.config/nvim/spell/
