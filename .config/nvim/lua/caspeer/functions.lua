@@ -6,6 +6,14 @@ local function map(m, l, r)
 	vim.keymap.set(m, l, r, { noremap = true, silent = true })
 end
 
+function make()
+	local make_program = fn.input("Command: ",vim.bo.makeprg)
+	vim.bo.makeprg = make_program
+	vim.cmd("make")
+end
+
+map({ 'n', 'x' }, "<leader>o", make)   -- next equal indent
+
 function indent_traverse(direction, equal) -- {{{
 return function()
 	-- Get the current cursor position
