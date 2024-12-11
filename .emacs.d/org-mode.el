@@ -3,13 +3,12 @@
  ;; Associate all org files with org mode
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 (add-to-list 'auto-mode-alist '(".*/[0-9]*-[0-9]*-[0-9]*$" . org-mode))
-(add-to-list 'auto-mode-alist '("~/org/zettle/slip-box/[^.]*\\'" . org-mode))
+(add-to-list 'auto-mode-alist '("~/zettle/slip-box/[^.]*\\'" . org-mode))
 
 (defun caspeer/org-mode-setup ()
     (org-indent-mode)
     (variable-pitch-mode 1)
     (visual-line-mode 1)
-
     (setq
      ;; Edit settings
      org-auto-align-tags nil
@@ -109,8 +108,9 @@
     (set-face-attribute 'org-special-keyword nil :inherit '(font-lock-comment-face fixed-pitch))
     (set-face-attribute 'org-meta-line nil :inherit '(font-lock-comment-face fixed-pitch))
     (set-face-attribute 'org-checkbox nil  :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number nil :inherit 'fixed-pitch)
-    (set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch))
+    ;(set-face-attribute 'line-number nil :inherit 'fixed-pitch)
+    ;(set-face-attribute 'line-number-current-line nil :inherit 'fixed-pitch)
+	)
 
 
 (defun caspeer/org-capture-inbox ()
@@ -118,14 +118,17 @@
 	(org-capture nil "i")
 	)
 (use-package org-modern
-    :ensure t)
+    :ensure t
+	:config
+	(setq org-modern-star 'replace)
+	)
 
 (use-package org
     :commands (org-capture org-agenda)
 	:init
 	(add-hook 'org-mode-hook #'caspeer/org-mode-setup)
 	(add-hook 'org-mode-hook #'caspeer/org-font-setup)
-	
+
 	(add-hook 'org-mode-hook #'org-modern-mode)
     (add-hook 'org-agenda-finalize-hook #'org-modern-agenda)
 	:bind (("C-c l" . org-store-link)
@@ -150,7 +153,7 @@
 			 )
 			("a" "Assignment" entry (file+headline "~/org/college.org" "Assignments")
 			 "* TODO %?\n %^g \n  SCHEDULED: %t\n  :PROPERTIES:\n  :DEADLINE: %^T\n  :END:")
-			
+
 			("j" "Journal"
 			 entry (function today-journal-file)
 			 "* %<%Y-%m-%d>: \n %? "
@@ -175,20 +178,15 @@
 	(setq org-agenda-files (list "inbox.org"))
     ;; Configure custom agenda views
     (global-set-key "\C-ca" 'org-agenda)
-    
+
     )
-
-
-
 
 (use-package org-bullets
     :after org
     :hook (org-mode . org-bullets-mode)
-    :custom
-    (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
-
-
-
+	;;:custom
+    ;;(org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+	)
 
 (defun caspeer/org-mode-visual-fill ()
     (setq visual-fill-column-width 100
@@ -214,8 +212,7 @@
 
 (add-hook 'org-capture-mode-hook 'delete-other-windows)
 
-
-(defcustom org-roam-filter-by-entries '("refs", "slip-box")
+(defcustom org-roam-filter-by-entries '("refs" "slip-box")
   "Entries (tags or directories) to be excluded for Org-roam node filtering."
   :type '(repeat string)
   :group 'org-roam)
@@ -260,37 +257,18 @@ Otherwise, prompt the user to select from existing entries."
 	(if new-entries
 			(let ((org-roam-filter-by-entries new-entries))
 				(caspeer/org-roam-node-find-only))
-		(let ((selected-entries (completing-read-multiple "Select entries to filter by (seperate by ,): " org-roam-filter-by-entries)))
+		(let ((selected-entries (completing-read "Select entries to filter by (seperate by ,): " org-roam-filter-by-entries)))
 			(let ((org-roam-filter-by-entries selected-entries))
 				(caspeer/org-roam-node-find-only)))))
 (global-set-key (kbd "C-c n e") 'caspeer/org-roam-node-find-entry)
 
-
-
-
-;;Org-Roam
-
-
-;; (defun caspeer/org-add-date-to-headlines-in-file ()
-;; 	(interactive)
-;; 	(insert (concat "#+date: " (format-time-string "%Y-%M-%D %H")) )
-;; 		)
-
-(defun caspeer/org-add-ids-to-headlines-in-file ()
-	"Add ID properties to all headlines in the inbox.org  file which
-do not already have one."
-	(interactive )
-	(if (string= (buffer-file-name) (concat org-roam-directory "/inbox.org"))
-				 (org-map-entries 'org-id-get-create)
-		
-		)
+(defun caspeer/org-roam-dailies-name ()
+	"Prompt for a title and create a filename based on it for daily notes."
+	(let ((title (read-string "Title: ")))
+		(concat (replace-regexp-in-string "[^a-zA-Z0-9_-]" "_" title) ".org"))
 	)
 
-(add-hook 'org-mode-hook
-          (lambda ()
-              (add-hook 'before-save-hook 'caspeer/org-add-ids-to-headlines-in-file nil 'local)))
-
-
+;;Org-Roam
 (use-package org-roam
 	:ensure t
 	:bind (
@@ -311,33 +289,31 @@ do not already have one."
 				 ;; ("C-c d" . org-roam-dailies-goto-today)
 				 ))						;
 	:custom
-	(org-roam-directory (file-truename "~/org/zettle"))
-	(roam-completion-everywhere t)
+	(org-roam-directory (file-truename "~/zettle"))
+	(roam-completion-everywhere nil)
 	(org-roam-capture-templates
 	 '(
 	   ("s" "slip-box" plain "%?"
-		:target (file+head "slip-box/${slug}"
+		:target (file+head "slip-box/${slug}.org"
 						   "#+title:"
 						   )
 		:unnarrowed t
 		:unnarrowed-sections (1))
 	   ("r" "refrence" plain "%?"
 		:target (file+head "refs/${slug}.org" "#+title:${title}\n
-#+date:%<%Y-%m-%d %a> \n
-")
+#+date:%<%Y-%m-%d %a>")
 		:unnarrowed t
 		)
 	   ))
 	;; Add more templates as needed
+
 	:config
-	
 	(cl-defmethod org-roam-node-directories ((node org-roam-node))
 		"Access slot \"directory\" of org-roam-node struct CL-X"
 		(if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
 				(format "(%s)" (car (f-split dirs)))
 			""))
 
-	
 	(add-to-list 'display-buffer-alist
 				 '("\\*org-roam\\*"
 				   (display-buffer-in-direction)
@@ -346,24 +322,23 @@ do not already have one."
 				   (window-height . fit-window-to-buffer)))
 	(org-roam-db-autosync-mode)
 	(setq org-roam-file-extensions '("org" "org_archive")
+		  org-roam-completion-everywhere t
 		  org-id-extra-files (org-roam-list-files)
 		  org-roam-dailies-directory "."
 		  org-roam-dailies-capture-templates '(
-											   ("f" "fleeting" plain "* %i%?"
-												:target (file+head "fleeting-notes.org" "#+date: %<%Y-%m-%d>\n")
+											   ("f" "fleeting" entry "* %i%?"
+												:target (file+head "%(caspeer/org-roam-dailies-name)" "#+date: %<%Y-%m-%d>\n")
 												:empty-lines 1
 												)
 											   )
 		  org-roam-node-display-template "${title}"
-		  org-roam-capture-ref-templates 
+		  org-roam-capture-ref-templates
 		  '(("r" "ref" entry "* %?" :target
 			 (file+head "refs/${slug}.org" "#+title: ${title}\n
 #+date: %<%Y-%m-%d> %a\n
-#+filetags:\n")
+#+filetags:")
 			 :unnarrowed t
 			 ))
 		  )
-		  
-	;; If using org-roam-protocol
-	(require 'org-roam-protocol))
-
+	(require 'org-roam-protocol)	;; If using org-roam-protocol
+	)
