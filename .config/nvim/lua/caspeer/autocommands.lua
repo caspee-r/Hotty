@@ -24,6 +24,7 @@ augroup locallist
 augroup END
 ]]
 
+vim.cmd [[autocmd BufReadPre *.asm let g:asmsyntax = "fasm"]]
 
 -- Delete [No Name] buffers
 autocmd("BufHidden", {

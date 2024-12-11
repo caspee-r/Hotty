@@ -5,11 +5,25 @@ return {
     "nvim-lua/plenary.nvim", -- Useful lua functions used ny lots of plugins
 
     -- Colorschemes
-    {
-        "sainnhe/sonokai",
-        lazy = true,
+	{
+		'ntk148v/komau.vim'
 	},
-	
+	{
+		'thimc/gruber-darker.nvim',
+		config = function()
+			require('gruber-darker').setup({
+				-- OPTIONAL
+				transparent = true, -- removes the background
+				-- underline = false, -- disables underline fonts
+				-- bold = false, -- disables bold fonts
+			})
+		end,
+	},
+	{
+		"sainnhe/sonokai",
+		lazy = true,
+	},
+
 	{
 		"rebelot/kanagawa.nvim",
 		lazy = true,
@@ -33,30 +47,30 @@ return {
 		priority = 100,
 	},
 
-    {
-        "joshdick/onedark.vim",
-        lazy = true,
-    },
+	{
+		"joshdick/onedark.vim",
+		lazy = true,
+	},
 
-    -- LSP
-    {
-        "williamboman/mason.nvim",
-    },
-    "williamboman/mason-lspconfig.nvim",
-	
-    -- jump diagnostics lsp
-    {
-        "folke/trouble.nvim",
-        --dependencies = "kyazdani42/nvim-web-devicons",
-        cmd = "Trouble",
-        keys = {
-            { "<leader>q", "<cmd>Trouble qflist toggle<cr>", desc = "trouble" },
-        },
-        opts = {},
-        lazy = true,
-    },
+	-- LSP
+	{
+		"williamboman/mason.nvim",
+	},
+	"williamboman/mason-lspconfig.nvim",
 
-    -- tmux-vim navigation
+	-- jump diagnostics lsp
+	{
+		"folke/trouble.nvim",
+		--dependencies = "kyazdani42/nvim-web-devicons",
+		cmd = "Trouble",
+		keys = {
+			{ "<leader>q", "<cmd>Trouble qflist toggle<cr>", desc = "trouble" },
+		},
+		opts = {},
+		lazy = true,
+	},
+
+	-- tmux-vim navigation
 	{
 		"christoomey/vim-tmux-navigator",
 		cmd = {
@@ -100,44 +114,7 @@ return {
 		end
 	},
 
-	--Indentation
-	{
-		"lukas-reineke/indent-blankline.nvim",
-		event = "BufWinEnter",
-		main = "ibl",
-		config = function()
-			local ibl = require("ibl")
-			vim.cmd([[highlight IndentBlanklineIndent1 guifg=#0984ef gui=nocombine]])
 
-			vim.cmd([[let g:indent_blankline_char='┆']])
-
-			vim.opt.list = true
-			vim.opt.listchars:append("eol:↴")
-
-			ibl.setup({
-				--show_end_of_line = true,
-				--show_current_context = true,
-				--show_current_context_start = true,
-				debounce = 100,
-				indent = {char = "|"},
-				whitespace = {
-					highlight = { "Whitespace", "NonText" },
-					remove_blankline_trail = true,
-				},
-				scope = {
-					exclude = { language = { "lua" } },
-					show_start = true,
-					show_end = true,
-					highlight = { "Function", "Label" },
-
-				},
-
-
-			})
-		end
-	},
-
-	--NvimTree
 	{
 		"windwp/nvim-ts-autotag",
 		lazy = true,
