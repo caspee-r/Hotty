@@ -1,5 +1,6 @@
 --vim.loader.enable()
 
+vim.cmd[[set path+=.]]
 vim.cmd[[set path+=*/**]]
 vim.cmd[[set path+=/usr/include/]]
 vim.cmd[[
@@ -8,6 +9,7 @@ let g:netrw_winsize = 20
 let g:netrw_banner = 0
 let g:netrw_list_hide = '\(^\|\s\s\)\zs\.\S\+'
 let g:netrw_localcopydircmd = 'cp -r'
+let g:netrw_keepdir	= 1 
 hi! link netrwMarkFile Search
 let g:netrw_browsex_viewer= "xdg-open"
 nnoremap <leader>e :Lexplore %:p:h<CR>
@@ -63,7 +65,7 @@ local options = {
 	sidescrolloff = 5,
 	guifont = "monospace:h17", -- the font used in graphical neovim applications
 	autoindent = true,
-	autochdir = true,
+	autochdir = false,
 	winbar = '%f',
 	compatible = false,
 	--[[ iskeyword = '-', ]]

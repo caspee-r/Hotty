@@ -58,18 +58,6 @@ return {
 	},
 	"williamboman/mason-lspconfig.nvim",
 
-	-- jump diagnostics lsp
-	{
-		"folke/trouble.nvim",
-		--dependencies = "kyazdani42/nvim-web-devicons",
-		cmd = "Trouble",
-		keys = {
-			{ "<leader>q", "<cmd>Trouble qflist toggle<cr>", desc = "trouble" },
-		},
-		opts = {},
-		lazy = true,
-	},
-
 	-- tmux-vim navigation
 	{
 		"christoomey/vim-tmux-navigator",

@@ -6,6 +6,12 @@ local function map(m, l, r)
 	vim.keymap.set(m, l, r, { noremap = true, silent = true })
 end
 
+vim.api.nvim_set_keymap("n", "<leader>cp", [[:let @+ = expand('%:p')<CR>]], { noremap = true, silent = true })
+function copy_buffer_file_path(bufnr)
+	local filepath = vim.api.nvim_buf_get_name(0)
+	vim.fn.setreg("+", filepath) -- Set the clipboard register
+end
+
 function make()
 	local make_program = fn.input("Command: ",vim.bo.makeprg)
 	vim.bo.makeprg = make_program

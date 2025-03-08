@@ -8,6 +8,7 @@ vim.cmd("ab tel Telescope")
 -- Shorten function name
 local keymap = vim.api.nvim_set_keymap
 
+
 --Remap space as leader key
 keymap("", "<Space>", "<Nop>", opts)
 keymap("n", "<leader>e", ":Lexplore<CR>", term_opts)
@@ -70,9 +71,12 @@ vim.keymap.set({ "n", "v" }, "<leader>d", [["_d]])
 vim.keymap.set("n", "<leader>x", "<cmd>!chmod u+x %<CR>", { silent = true })
 
 -- source file
-vim.keymap.set("n", "<leader><leader>", function()
-    vim.cmd("so")
-end)
+vim.keymap.set("n", "<leader><leader>s","<cmd>source %<CR>")
+-- source line
+vim.keymap.set("n","<leader>s",":.lua<CR>")
+-- source selection
+vim.keymap.set("v","<leader>s",":lua<CR>")
+
 -- Resize with arrows
 keymap("n", "<C-Up>", ":resize +2<CR>", opts)
 keymap("n", "<C-Down>", ":resize -2<CR>", opts)
@@ -120,7 +124,7 @@ keymap("n", "]c", ":cnext<CR>", opts)
 
 
 -- lsp formatting
-local Caspeer = vim.api.nvim_create_augroup('Caspeer',{ })
+local Caspeer = vim.api.nvim_create_augroup('CaspeerLSP',{ })
 vim.api.nvim_create_autocmd('LspAttach',
 {
 	group = Caspeer,
@@ -175,8 +179,6 @@ keymap("t", "<C-j>", "<C-\\><C-N><C-w>j", term_opts)
 keymap("t", "<C-k>", "<C-\\><C-N><C-w>k", term_opts)
 keymap("t", "<C-l>", "<C-\\><C-N><C-w>l", term_opts)
 
---Trouble--
-keymap("n", "<leader>q", "<cmd>Trouble qflist toggle<CR>", opts)
 
 keymap("n","<leader>i",":make<CR>",opts)
 
