@@ -197,7 +197,6 @@
     :ensure t
     :hook (org-mode . caspeer/org-mode-visual-fill))
 
-
 (defvar org-electric-pairs '((?/ . ?/) (?= . ?=) ) "Electric pairs for org-mode.")
 (defun org-add-electric-pairs ()
     (setq-local electric-pair-pairs (append electric-pair-pairs org-electric-pairs))
