@@ -50,7 +50,7 @@ return {
 				-- evaluates to the full-lenth path
 				provider = function(self)
 					local trail = self.pwd:sub(-1) == "/" and "" or "/"
-					return self.pwd .. trail .." "
+					return " " .. self.pwd .. trail .." "
 				end,
 			},
 			{
@@ -58,7 +58,7 @@ return {
 				provider = function(self)
 					local pwd = vim.fn.pathshorten(self.pwd)
 					local trail = self.pwd:sub(-1) == "/" and "" or "/"
-					return  pwd .. trail .. " "
+					return  " " .. pwd .. trail .. " "
 				end,
 			},
 
@@ -75,7 +75,7 @@ return {
 			Space,
 			{ -- git branch name
 				provider = function(self)
-					return ' ' .. self.status_dict.head
+					return ' ' .. self.status_dict.head .. " "
 				end,
 				hl = { bold = true },
 			},
@@ -156,7 +156,7 @@ return {
 		}
 		-- statusline
 		local DefaultStatusline = {
-			Git, Space, pwd, Align,
+			Git, Align, pwd, Align,
 			Modified, Ruler, Space,
 		}
 		local InactiveStatusline = {
