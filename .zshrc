@@ -1,34 +1,8 @@
-
-
-### Added by Zinit's installer
-#if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
-#    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
-#    command mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX "$HOME/.local/share/zinit"
-#    command git clone https://github.com/zdharma-continuum/zinit "$HOME/.local/share/zinit/zinit.git" && \
-#        print -P "%F{33} %F{34}Installation successful.%f%b" || \
-#        print -P "%F{160} The clone has failed.%f%b"
-#fi
-#
-#source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
-#autoload -Uz _zinit
-#(( ${+_comps} )) && _comps[zinit]=_zinit
-#
-## Load a few important annexes, without Turbo
-## (this is currently required for annexes)
-#zinit light-mode for \
-#    zdharma-continuum/zinit-annex-as-monitor \
-#    zdharma-continuum/zinit-annex-bin-gem-node \
-#    zdharma-continuum/zinit-annex-patch-dl \
-#    zdharma-continuum/zinit-annex-rust
-#
-### End of Zinit's installer chunk
-#
 ## Options
 setopt autocd
 unsetopt BEEP
-set -o vi
 
-## history 
+## history
 # Store history in a file to preserve it across sessions
 HISTFILE=~/.zsh_history
 
@@ -61,17 +35,15 @@ zle vi-cmd-mode
 zle .vi-history-search-backward
 }
 
-
 autoload vi-search-fix
 zle -N vi-search-fix
 bindkey -M viins '\e/' vi-search-fix
-
 
 function cal() {
     if [ -t 1 ]; then ncal -b "${@}"; else command cal "${@}"; fi
 }
 
-# fixing copy&paste 
+# fixing copy&paste
 function vi-yank-wl-copy {
     zle vi-yank
    echo "$CUTBUFFER" | xclip -selection clipboard -i
@@ -86,21 +58,13 @@ wl-paste() {
 zle -N wl-paste
 bindkey -M vicmd 'p' wl-paste
 
-#plugins
-#zinit light zdharma-continuum/fast-syntax-highlighting
-#zinit ice lucid
-#zinit snippet https://github.com/ohmyzsh/ohmyzsh/blob/master/plugins/fzf/fzf.plugin.zsh
-#zinit ice lucid
-#zinit snippet https://github.com/ohmyzsh/ohmyzsh/blob/master/lib/history.zsh
-#zinit ice lucid atload'_zsh_autosuggest_start'
-#zinit light zsh-users/zsh-autosuggestions
 ### Aliases
-alias v="nvim"
 alias vim="nvim"
+alias v="nvim"
 alias py="python3"
-alias vimp="nvim ~/.config/nvim"
+alias vimp="cd ~/.config/nvim;nvim ."
 alias rn="ranger"
-alias z="zoxide"
+#alias z="zoxide"
 alias em="emacsclient --create-frame"
 alias bat="batcat"
 alias ls="ls --color=always"
@@ -119,8 +83,6 @@ export FZF_ALT_C_OPTS="--height 70 --preview 'tree -C {} | head -50'"
 ## ENV
 export EDITOR="nvim"
 export PATH="$PATH:$HOME/.local/bin:$HOME/.local/scripts:$HOME/.local/bin:$HOME/software/nvim-linux64/bin:$HOME/node_modules/hexo-cli/bin"
-
-
 
 # Minimal Zsh prompt
 PROMPT='%F{blue}%n%f@%F{gray}%m%f %F{yellow}[%1~] %F{red}-> %F{white}'
@@ -151,3 +113,48 @@ autoload -U is-at-least
 bindkey -v
 bindkey -M viins '^?' backward-delete-char
 bindkey -M viins '^W' backward-delete-word
+
+_z_cd() {
+    cd "$@" || return "$?"
+
+    if [ "$_ZO_ECHO" = "1" ]; then
+        echo "$PWD"
+    fi
+}
+
+z() {
+    if [ "$#" -eq 0 ]; then
+        _z_cd ~
+    elif [ "$#" -eq 1 ] && [ "$1" = '-' ]; then
+        if [ -n "$OLDPWD" ]; then
+            _z_cd "$OLDPWD"
+        else
+            echo 'zoxide: $OLDPWD is not set'
+            return 1
+        fi
+    else
+        _zoxide_result="$(zoxide query -- "$@")" && _z_cd "$_zoxide_result"
+    fi
+}
+
+zi() {
+    _zoxide_result="$(zoxide query -i -- "$@")" && _z_cd "$_zoxide_result"
+}
+
+
+alias za='zoxide add'
+
+alias zq='zoxide query'
+alias zqi='zoxide query -i'
+
+alias zr='zoxide remove'
+zri() {
+    _zoxide_result="$(zoxide query -i -- "$@")" && zoxide remove "$_zoxide_result"
+}
+
+
+_zoxide_hook() {
+    zoxide add "$(pwd -L)"
+}
+
+chpwd_functions=(${chpwd_functions[@]} "_zoxide_hook")
