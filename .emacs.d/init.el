@@ -36,15 +36,15 @@
 	(load-file (expand-file-name file "~/.emacs.d")))
 
 ;; Font Familly
-(set-face-attribute 'default nil :font "Iosevka Term" :height 150)
-
-
+(set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 150)
 
 ;; UI CONFIGURATION
 (setq inhibit-startup-message t
 	  use-dialog-box nil
 	  warning-minimum-level :emergency
 	  display-line-numbers-type 'relative
+	  initial-scratch-message ";;caspeer"
+	  ring-bell-function 'ignore
 	  )
 (tool-bar-mode -1) ;Disable the toolbar
 (menu-bar-mode -1);Disable the menu bar
@@ -61,6 +61,7 @@
  scroll-step 1
  scroll-preserve-screen-position 'always
  scroll-conservatively 1000
+ package-native-compile t
  next-line-add-newlines t
  load-prefer-newer t
  require-final-newline t
@@ -120,20 +121,37 @@
   (setq tab-width custom-tab-width))
 
 
-;;(setq-default electric-indent-inhibit t)
-
 (add-hook 'prog-mode-hook 'enable-tabs)
 
-;; (global-set-key (kbd "TAB") 'tab-to-tab-stop)
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
+
+;; Common Lisp
+(setq inferior-lisp-program "clisp")
+
+(global-completion-preview-mode 1)
 
 (use-package simpc-mode
 	:load-path "/home/caspeer/.emacs.d/"
-	;:hook ('simpc-mode-hook . )
-
 	)
 (add-to-list 'auto-mode-alist '("\\.[hc]\\(pp\\)?\\'" . simpc-mode))
 ;;(add-hook 'simpc-mode-hook 'subword-mode)
 
+(use-package projectile
+	:init
+	(projectile-mode t)
+	:config
+	:bind (
+		   ("C-x p p" . 'projectile-switch-project)
+		   ("C-x p b" . 'projectile-switch-to-buffer)
+		   ("C-x p g" . 'projectile-grep)
+		   ("C-x p k" . 'projectile-kill-buffers)
+		   ("C-x p o" . 'projectile-switch-open-project)
+
+
+		   )
+	)
 
 (use-package whitespace
 			 :bind ("C-c t w" . whitespace-mode)
@@ -170,10 +188,7 @@
 			(font-lock-add-keywords nil
 									'(("\\<\\(FIX\\|FIXME\\|TODO\\|BUG\\|HACK\\):" 1 font-lock-warning-face t)))))
 
-
-
-;-----------
-
+;; vterm
 (use-package vterm
 			 :commands vterm
 			 :config
