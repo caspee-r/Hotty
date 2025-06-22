@@ -53,7 +53,7 @@
 							(800 1000 1200 1400 1600 1800 2000)
 							" ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
      org-agenda-current-time-string
-     "󱫙 now ─────────────────────────────────────────────────"
+     "󰩓 now ─────────────────────────────────────────────────"
 
      org-agenda-custom-commands
      '(("d" "Dashboard"
@@ -134,7 +134,9 @@
 	:bind (("C-c l" . org-store-link)
            ("C-c c" . org-capture)
 		   ("C-c i" . 'caspeer/org-capture-inbox )
-           ("C-M-|" . indent-rigidly))
+           ("C-M-|" . indent-rigidly)
+		   ("C-c !" . org-timestamp)
+		   )
     :config
     (global-set-key "\C-cb" 'org-switchb)
     (require 'org-habit)
@@ -151,8 +153,8 @@
 			 entry  (file+headline "~/org/inbox.org" "TASKS")
 			 "* TODO %i%?"
 			 )
-			("a" "Assignment" entry (file+headline "~/org/college.org" "Assignments")
-			 "* TODO %?\n %^g \n  SCHEDULED: %t\n  :PROPERTIES:\n  :DEADLINE: %^T\n  :END:")
+			("y" "Youtube video" entry (file+headline "~/org/yt.org" "Watch Later")
+			 "**  %?\n \n")
 
 			("j" "Journal"
 			 entry (function today-journal-file)
@@ -211,71 +213,45 @@
 
 (add-hook 'org-capture-mode-hook 'delete-other-windows)
 
-(defcustom org-roam-filter-by-entries '("refs" "slip-box")
-  "Entries (tags or directories) to be excluded for Org-roam node filtering."
-  :type '(repeat string)
-  :group 'org-roam)
-
-
-
-;; Helper function to filter org-roam-node by entries (tags or directories).
-(defun caspeer/org-roam-node--filter-by-entries (node &optional included-entries excluded-entries)
-  "Filter org-roam-node by entries (tags or directories)."
-  (let* ((entries (append (org-roam-node-tags node)
-                          (butlast (f-split (f-relative (org-roam-node-file node) org-roam-directory)))))
-         (included (and included-entries (not (seq-some (lambda (entry) (member entry entries)) included-entries))))
-         (excluded (and excluded-entries (seq-some (lambda (entry) (member entry entries)) excluded-entries))))
-    (if (or included excluded)
-        nil t)))
-
-;; Helper function to filter org-roam-node to show only nodes with entries in `org-roam-filter-by-entries`.
-(defun caspeer/org-roam-node--filter-excluded (node)
-  "Filter org-roam-node to show only nodes with entries in `org-roam-filter-by-entries`."
-  (caspeer/org-roam-node--filter-by-entries node nil org-roam-filter-by-entries))
-
-
-;; Modded org-roam-node-find which filters nodes using entries (tags or directories).
-(defun caspeer/org-roam-node-find ()
-  "Show Org-roam nodes, filtering by entries (tags or directories)."
-  (interactive)
-  (org-roam-node-find nil nil
-                      (lambda (node) (caspeer/org-roam-node--filter-by-entries node nil org-roam-filter-by-entries))))
-
-;; Show only Org-roam nodes that match entries in `org-roam-filter-by-entries`.
-(defun caspeer/org-roam-node-find-only ()
-	"Show only Org-roam nodes that match entries in `org-roam-filter-by-entries`."
-	(interactive)
-	(org-roam-node-find nil nil (lambda (node) (not (caspeer/org-roam-node--filter-excluded node)))))
-(global-set-key (kbd "C-c n o") 'caspeer/org-roam-node-find-only)
-
-(defun caspeer/org-roam-node-find-entry (&optional new-entries)
-	"Show only Org-roam nodes matching the specified entries interactively.
-If NEW-ENTRIES are provided, use them as the entries to match by (seperate entries by ,).
-Otherwise, prompt the user to select from existing entries."
-	(interactive)
-	(if new-entries
-			(let ((org-roam-filter-by-entries new-entries))
-				(caspeer/org-roam-node-find-only))
-		(let ((selected-entries (completing-read "Select entries to filter by (seperate by ,): " org-roam-filter-by-entries)))
-			(let ((org-roam-filter-by-entries selected-entries))
-				(caspeer/org-roam-node-find-only)))))
-(global-set-key (kbd "C-c n e") 'caspeer/org-roam-node-find-entry)
-
 (defun caspeer/org-roam-dailies-name ()
 	"Prompt for a title and create a filename based on it for daily notes."
 	(let ((title (read-string "Title: ")))
 		(concat (replace-regexp-in-string "[^a-zA-Z0-9_-]" "_" title) ".org"))
 	)
 
+
 ;;Org-Roam
+
+(defcustom caspeer/org-roam-filter-entries '("refs" "slip-box")
+	"org-roam entries to filter with"
+	:type '(repeat string)
+	:group 'org-roam
+	)
+
+(defun caspeer/org-roam-node--include (node folders)
+	"include only org-roam nodes in the specified folders"
+	(let ((node-path (org-roam-node-file node)))
+		(or (member (f-base (f-parent node-path)) folders) (member node-path folders))
+		))
+
+(defun caspeer/org-roam-node-find-entry (&optional new-entries)
+	"find only nodes within the provided entries or in org-roam-filter-entires"
+	(interactive)
+	(let ((selected-entries (completing-read-multiple "select entries (separated by ','):" caspeer/org-roam-filter-entries)))
+		 (org-roam-node-find nil nil (lambda (node) (caspeer/org-roam-node--include node selected-entries)))
+		 )
+	)
+
+
 (use-package org-roam
 	:ensure t
 	:bind (
 		   ("C-c n r" . org-roam-node-random)
 		   ("C-c n f" . org-roam-node-find)
+		   ("C-c n e" . caspeer/org-roam-node-find-entry)
 		   ("C-c n c" . org-roam-capture)
 		   ("C-c n z" . caspeer/org-roam-zettle)
-		   ("C-c n i" . org-roam-dailies-capture-today)
+		   ("C-c n t" . org-roam-dailies-capture-today)
 		   (:map org-mode-map
 				 ("C-c n g" . org-roam-graph)
 				 ("C-c n l" . org-roam-buffer-toggle)
@@ -286,7 +262,9 @@ Otherwise, prompt the user to select from existing entries."
 				 ;; Dailies
 				 ;; ("C-c j" . org-roam-dailies-capture-today)
 				 ;; ("C-c d" . org-roam-dailies-goto-today)
-				 ))						;
+				 ))
+										;:bind-keymap
+;("C-c n d" . org-roam-dailies-map)
 	:custom
 	(org-roam-directory (file-truename "~/zettle"))
 	(roam-completion-everywhere nil)
@@ -307,6 +285,14 @@ Otherwise, prompt the user to select from existing entries."
 	;; Add more templates as needed
 
 	:config
+	(require 'org-roam-dailies)
+	(cl-defmethod org-roam-node-my-title ((node org-roam-node))
+		(let ((node-dir (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
+			(if (string= node-dir "slip-box/")
+					(concat (org-roam-node-title node) " : " (f-base (org-roam-node-file node)))
+				(org-roam-node-title node))
+			)
+		)
 	(cl-defmethod org-roam-node-directories ((node org-roam-node))
 		"Access slot \"directory\" of org-roam-node struct CL-X"
 		(if-let ((dirs (file-name-directory (file-relative-name (org-roam-node-file node) org-roam-directory))))
@@ -321,16 +307,19 @@ Otherwise, prompt the user to select from existing entries."
 				   (window-height . fit-window-to-buffer)))
 	(org-roam-db-autosync-mode)
 	(setq org-roam-file-extensions '("org" "org_archive")
+		  org-roam-dailies-directory "journal/"
 		  org-roam-completion-everywhere t
 		  org-id-extra-files (org-roam-list-files)
-		  org-roam-dailies-directory "."
-		  org-roam-dailies-capture-templates '(
-											   ("f" "fleeting" entry "* %i%?"
-												:target (file+head "%(caspeer/org-roam-dailies-name)" "#+date: %<%Y-%m-%d>\n")
-												:empty-lines 1
+		  org-roam-dailies-capture-templates '(( "d" "default" entry
+												 "* %<%H:%M>: %?"
+												:if-new (file+head "%<%Y-%m-%d>.org"
+														 "#+title: %<%Y-%m-%d>\n")
 												)
+											   ( "f" "fleeting note" entry "* %<%Y-%m-%d> at %<%H:%M> %? %(ignore-errors (org-id-get-create))"
+												 :if-new (file+head "inbox.org" "* Fleeting Notes")
+												 )
 											   )
-		  org-roam-node-display-template "${title}"
+		  org-roam-node-display-template "${my-title}"
 		  org-roam-capture-ref-templates
 		  '(("r" "ref" entry "* %?" :target
 			 (file+head "refs/${slug}.org" "#+title: ${title}\n
