@@ -196,17 +196,20 @@
 			 ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
 			 (setq vterm-max-scrollback 10000))
 
+(use-package eldoc-box)
+(eldoc-box-hover-mode t)
+
+
+(use-package embark
+
+	)
 
 (use-package prescient
 	:ensure t
+	:config
+	(prescient-persist-mode)
 	)
 
-;; Which Key??
-(use-package which-key
-			 :defer 0
-			 :diminish which-key-mode
-			 :config
-			 (setq which-key-idle-delay 1))
 
 (use-package multiple-cursors
 	:ensure t
@@ -227,29 +230,6 @@
 			 :custom
 			 (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
-(defun filter-symbolic-links (paths)
-  "Return a new list from PATHS with duplicates removed where files and symbolic links point to the same file."
-  (let ((unique-paths '()))
-    (dolist (path paths)
-      (let ((true-path (file-truename path)))
-        ;; Only add the path if its true path is not already in the unique-paths list
-        (unless (member true-path unique-paths)
-          (push true-path unique-paths))))
-    ;; Return the unique paths as a new list in the original order
-    (nreverse unique-paths)))
-
-(defun recentf-find-file (&optional filter)
-  "Find a recent file using `completing-read'.
-When optional argument FILTER is a function, it is used to
-transform recent files before completion."
-  (interactive)
-  (let* ((filter (if (functionp filter) filter #'abbreviate-file-name))
-         (file (completing-read "Choose recent file: "
-                                (delete-dups (mapcar filter recentf-list))
-                                nil t)))
-    (when file
-      (find-file file))))
-
 (use-package recentf
 	:ensure nil
 	:config
@@ -258,69 +238,132 @@ transform recent files before completion."
 		  recentf-keep '(file-remote-p file-readable-p file-exists-p)
 		  )
 	(recentf-mode t)
-	:bind ("C-c f r" . 'recentf-find-file)
+	:bind ("C-c f r" . 'recentf)
 	)
-
 
 ;; Global HOOKS
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
 ;; Dired ------------------------
 (use-package dired
-			 :ensure nil
-			 :hook ('dired-mode-hook 'auto-revert-mode)
-			 :commands (dired dired-jump)
-			 :bind (:map  dired-mode-map
-						  ("-" . 'dired-up-directory)
-						  ("C-x C-j" . dired-jump))
+	:hook ('dired-mode-hook 'auto-revert-mode)
+	:bind (:map  dired-mode-map
+				 ("-" . 'dired-up-directory)
+				 ("1" . 'dired-do-shell-command)
+				 ("/ c" . 'dired-mark-files-containing-regexp)
+				 ("/ r" . 'dired-mark-files-regexp)
+				 ("/ e" . 'dired-mark-executables)
+				 ("/ d" . 'dired-mark-directories)
+				 ("/ l" . 'dired-mark-symlinks)
+				 ("/ s" . 'dired-mark-subdir-files)
+				 ("/ t" . 'dired-toggle-marks)
 
-			 :custom ((dired-listing-switches "-aghlt ")) ;;--group-directories-first
-			 :config
-			 (setq dired-dwim-target t)
-			 )
+				 )
 
-;;;  Registers
+	:custom ((dired-listing-switches "-aghlt ")) ;;--group-directories-first
+	:config
+	(setq
+	 dired-dwim-target t
+	 dired-kill-when-opening-new-dired-buffer t
+	 )
+	)
+
+;;  Registers
 (setq register-preview-delay 0)
 
-
-(use-package ido
-	:init
-	(setq
-	 ido-enable-flex-matching t
-	 ido-auto-merge-work-directories-length -1
-	 ido-create-new-buffer 'always
-	 ido-use-filename-at-point 'guess
-	 ido-everywhere t
-	 ido-default-buffer-method 'selected-window)
+;; Projects
+(use-package projectile
 	:config
-	(ido-mode 1)
-	(ido-everywhere 1)
-	(put 'ido-exit-minibuffer 'disabled nil)
-	(fido-mode 1)
+	(setq
+	 projectile-indexing-method 'alien
+	 projectile-enable-caching t
+	 projectile-require-project-root t
+	 )
 	)
+
+;; kbd macros
+(define-prefix-command 'caspeer/kbd-macros)
+(global-set-key (kbd "C-c m") 'caspeer/kbd-macros)
+
+(defalias 'change-inner-parens
+	(kmacro "C-a C-c j ( C-M-SPC C-d ("))
+(global-set-key (kbd "C-c m(") 'change-inner-parens)
+
+(defalias 'delete-rvalue
+   (kmacro "C-a C-c j = C-f C-k"))
+(global-set-key (kbd "C-c m=") 'delete-rvalue)
+
+
+;; mini-buffer completion
+(selectrum-mode +1)
+	(setq completion-styles '(orderless)
+		  selectrum-prescient-enable-filtering nil
+		  )
+(selectrum-prescient-mode)
 
 ;; HIPPIE
 (global-set-key [remap dabbrev-expand] 'hippie-expand)
 (setq hippie-expand-verbose nil)
+(setf completion-styles '(basic flex))
+;;(global-completion-preview-mode 1)
+
+
+(use-package flyspell-mode
+	:hook (org-mode . flyspell-mode)
+	:bind
+	(:map flyspell-mode
+		  ("C-," . 'flyspell-goto-next-error)
+		  ("C-;" . 'flyspell-auto-correct-word)
+		  ("C-M-;" . 'ispell-region)
+		  ("C-$" . 'ispell-word)
+		  ("C-M-#" . 'ispell-complete-word)
+		  )
+	)
+
 
 ;; Snippets
+(use-package yasnippet-snippets
+	:after yasnippet
+	:ensure t)
+
 (use-package yasnippet
-	:init
-	(add-hook 'simpc-mode-hook
+	:ensure t
+	:config
+	(setq yas-snippet-dirs (append yas-snippet-dirs '("~/.emacs.d/snippets")))
+	:hook ((text-mode
+			prog-mode
+			conf-mode
+			snippet-mode) . yas-minor-mode-on)
+	)
+
+
+(add-hook 'simpc-mode-hook
 			  (lambda ()
 				  (setq-local yas--major-mode 'c-mode)
 				  (yas-activate-extra-mode 'c-mode)))
-	:bind
-	(:map yas-minor-mode-map
-		  ("C-'". yas-expand)
-		  ([(tab)] . nil)
-		  ("TAB" . nil))
+
+
+
+
+(use-package dot-mode
+	:ensure t
 	:config
-	(yas-global-mode 1)
+	(global-dot-mode 1)
 	)
 
-(use-package yasnippet-snippets
-	:ensure t)
+(use-package android-mode
+	:config
+	(setq
+	 android-mode-avd "my_avd"
+	 android-mode-sdk-dir "/home/caspeer/android"
+	 )
+	)
+
+(use-package move-dup
+	:bind (("M-p"   . move-dup-move-lines-up)
+           ("C-M-p" . move-dup-duplicate-up)
+           ("M-n"   . move-dup-move-lines-down)
+           ("C-M-n" . move-dup-duplicate-down)))
 
 (use-package undo-tree
 	:ensure t
@@ -334,6 +377,11 @@ transform recent files before completion."
 	)
 
 (global-set-key (kbd "C-x c") 'compile)
+
+(global-set-key (kbd "C-c j") 'jump-char-forward)
+(global-set-key (kbd "C-c J") 'jump-char-backward)
+
+
 
 (add-hook 'simpc-mode-hook
 		  (lambda ()
@@ -363,24 +411,11 @@ transform recent files before completion."
 (global-set-key (kbd "C-c e e"	) 'eval-expression)
 (global-set-key (kbd "C-c e b"	) 'eval-buffer)
 (global-set-key (kbd "C-c SPC"	) 'async-shell-command)
-(global-set-key (kbd "C-c m"	) 'multi-occur-in-matching-buffers)
+;(global-set-key (kbd "C-c m"	) 'multi-occur-in-matching-buffers)
 (global-set-key (kbd "C-x k"	) 'kill-current-buffer)
-(global-set-key "\M-n"  'next-buffer)
-(global-set-key "\M-p"  'previous-buffer)
-;(global-set-key (kbd "C-.") #'other-window)
-;(global-set-key (kbd "C-,") #'prev-window)
 (global-set-key (kbd "M-u") 'upcase-dwim)
 (global-set-key (kbd "M-l") 'downcase-dwim)
 (global-set-key (kbd "M-c") 'capitalize-dwim)
-
-
-(defun caspeer/rm-this-file ()
-  (interactive)
-  (delete-file (buffer-file-name))
-  (kill-this-buffer)
-  )
-
-(global-set-key (kbd "C-c d") 'caspeer/rm-this-file)
 (global-set-key (kbd "C-c <insert>") 'insert-char)
 
 (defun toggle-window-split ()
@@ -450,30 +485,21 @@ transform recent files before completion."
 			 ad-do-it))
 
 (use-package rfc-mode)
-
-(use-package mu4e
-	:ensure nil
+(use-package python-mode
+	:ensure t
+	:hook (
+		   ('python-mode . 'flycheck-mode)
+		   )
 	:config
-	(setq mu4e-change-filenames-when-moving t
-		  mu4e-update-interval (* 10 60)
-		  mu4e-get-mail-command "mbsync -a"
-		  mu4e-mail-dir "~/.mail/gmail"
-		  mu4e-drafts-folder "/[Gmail].Drafts"
-		  mu4e-sent-folder "/[Gmail].Sent Mail"
-		  mu4e-refile-folder "/[Gmail].All Mail"
-		  mu4e-trash-folder "/[Gmail].Trash"
-		  )
-	(setq mu4e-maildir-shortcuts
-		  '(
-			("/Inbox" . ?i)
-			("/[Gmail].Drafts" . ?d)
-			("/[Gmail].Sent Mail" . ?s)
-			("/[Gmail].All Mail" . ?a)
-			("/[Gmail].Trash" . ?t)
-			)
+	(setq
+	 python-shell-interpreter "ipython3"
 
-		  )
-
+	 )
+	)
+(use-package pet
+	:ensure t
+	:config
+	(add-hook 'python-mode-hook 'pet-mode -10)
 	)
 
 ;;(use-package treesit-auto
@@ -504,16 +530,6 @@ transform recent files before completion."
 ;; 		)
 ;; 	  )
 
-(defun fixed-native-compile-async-skip-p
-        (native-compile-async-skip-p file load selector)
-    (let* ((naive-elc-file (file-name-with-extension file "elc"))
-           (elc-file       (replace-regexp-in-string
-                               "\\.el\\.elc$" ".elc" naive-elc-file)))
-        (or (gethash elc-file comp--no-native-compile)
-            (funcall native-compile-async-skip-p file load selector))))
-
-(advice-add 'native-compile-async-skip-p
-    :around 'fixed-native-compile-async-skip-p)
 
 (setq display-buffer-alist
 	  '(
@@ -530,8 +546,6 @@ transform recent files before completion."
 		 )
 		)
 	  )
-(put 'dired-find-alternate-file 'disabled nil)
-(put 'downcase-region 'disabled nil)
 
 ;; remap C-c C-b to Ibuffer
 (global-set-key (kbd "C-x C-b") 'ibuffer)
@@ -542,9 +556,8 @@ transform recent files before completion."
 			   "Discard all themes before loading new."
 			   (mapc #'disable-theme custom-enabled-themes))
 
-(load-theme 'gruber-darker)
+(load-theme 'kanagawa-wave)
 
-(set-face-background 'cursor "#1aed84")
 ;; (set-face-background 'default "#111")
 ;;(set-face-background 'isearch "#ff0")
 ;;(set-face-foreground 'isearch "#000")
