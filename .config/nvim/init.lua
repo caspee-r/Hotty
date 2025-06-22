@@ -6,7 +6,7 @@ require("caspeer.functions")
 ---@diagnostic disable-next-line
 vim.cmd([[
 try
-  colorscheme gruber-darker
+  colorscheme kanagawa
 catch /^vim\%((\a\+)\)\=:e185/
   colorscheme default
   set background=dark
