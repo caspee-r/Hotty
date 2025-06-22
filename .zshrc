@@ -1,6 +1,7 @@
 ## Options
 setopt autocd
 unsetopt BEEP
+setopt emacs
 
 ## history
 # Store history in a file to preserve it across sessions
@@ -29,35 +30,6 @@ bindkey '^[[A' history-search-backward   # Up arrow
 bindkey '^[[B' history-search-forward    # Down arrow
 bindkey "^R" history-incremental-search-backward
 
-# vim search fix
-vi-search-fix() {
-zle vi-cmd-mode
-zle .vi-history-search-backward
-}
-
-autoload vi-search-fix
-zle -N vi-search-fix
-bindkey -M viins '\e/' vi-search-fix
-
-function cal() {
-    if [ -t 1 ]; then ncal -b "${@}"; else command cal "${@}"; fi
-}
-
-# fixing copy&paste
-function vi-yank-wl-copy {
-    zle vi-yank
-   echo "$CUTBUFFER" | xclip -selection clipboard -i
-}
-zle -N vi-yank-wl-copy
-bindkey -M vicmd 'y' vi-yank-wl-copy
-
-wl-paste() {
-    CUTBUFFER=$(xclip -selection clipboard -o)
-    zle yank
-}
-zle -N wl-paste
-bindkey -M vicmd 'p' wl-paste
-
 ### Aliases
 alias vim="nvim"
 alias v="nvim"
@@ -66,23 +38,31 @@ alias vimp="cd ~/.config/nvim;nvim ."
 alias rn="ranger"
 #alias z="zoxide"
 alias em="emacsclient --create-frame"
-alias bat="batcat"
 alias ls="ls --color=always"
 alias mv="mv -v"
 alias cp="cp -v"
 alias rm="rm -v"
 alias cdp="cd $ROOT"
 
+
+export TERM=alacritty
 ## FZF
-export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b,--preview 'batcat {}'"
+export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b,--preview 'bat {}'"
 export FZF_DEFAULT_COMMAND="find . -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
-export FZF_ALT_C_COMMAND="fdfind -t d --hidden"
-export FZF_CTRL_T_COMMAND="fdfind -H -L --type f --type l --color never --search-path $HOME --search-path . "
-export FZF_CTRL_T_OPTS="--height 100 --preview 'batcat --color=always --line-range :50 {}'"
+export FZF_ALT_C_COMMAND="fd -t d --hidden"
+export FZF_CTRL_T_COMMAND="fd -H -L --type f --type l --color never --search-path $HOME --search-path . "
+export FZF_CTRL_T_OPTS="--height 100 --preview 'bat --color=always --line-range :50 {}'"
 export FZF_ALT_C_OPTS="--height 70 --preview 'tree -C {} | head -50'"
 ## ENV
 export EDITOR="nvim"
+export ANDROID_HOME=$HOME/android
+export ANDROID_SDK_ROOT=$ANDROID_HOME
 export PATH="$PATH:$HOME/.local/bin:$HOME/.local/scripts:$HOME/.local/bin:$HOME/software/nvim-linux64/bin:$HOME/node_modules/hexo-cli/bin"
+export PATH=$PATH:$ANDROID_HOME/emulator
+export PATH=$PATH:$ANDROID_HOME/tools
+export PATH=$PATH:$ANDROID_HOME/tools/bin
+export PATH=$PATH:$ANDROID_HOME/platform-tools
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
 
 # Minimal Zsh prompt
 PROMPT='%F{blue}%n%f@%F{gray}%m%f %F{yellow}[%1~] %F{red}-> %F{white}'
@@ -109,11 +89,6 @@ compinit
 
 # =============================================================================
 autoload -U is-at-least
-
-bindkey -v
-bindkey -M viins '^?' backward-delete-char
-bindkey -M viins '^W' backward-delete-word
-
 _z_cd() {
     cd "$@" || return "$?"
 
