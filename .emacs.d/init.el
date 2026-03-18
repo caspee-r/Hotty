@@ -1,42 +1,36 @@
-;; Startup Performance
-;; The default is 800 kilobytes.  Measured in bytes.
-
 ;; Package System Setup
-(require 'package)
+
 (setq
  package-archives '(("melpa" . "http://melpa.org/packages/")
-					("gnu"   . "https://elpa.gnu.org/packages/")
-					("org"   . "https://orgmode.org/elpa/")))
+					("gnu"   . "https://elpa.gnu.org/packages/"))
+ )
 
-(unless (package-installed-p 'use-package)
-  (package-refresh-contents)
-  (package-install 'use-package))
-(eval-when-compile
-  (require 'use-package))
 
 (package-initialize)
 (unless package-archive-contents
 	(package-refresh-contents))
 
-(setq gc-cons-threshold 100000000)
-(setq read-process-output-max (* 1024 1024))
-
-(defconst user-init-dir
-		  (cond ((boundp 'user-emacs-directory)
-				 user-emacs-directory)
-				((boundp 'user-init-directory)
-				 user-init-directory)
-				(t "~/.emacs.d/")))
-
-(setq user-emacs-directory (expand-file-name "~/.cache/emacs"))
-
-(defun load-user-file (file)
-	(interactive "f")
-	"Load a file in current user's configuration directory"
-	(load-file (expand-file-name file "~/.emacs.d")))
+(setq user-emacs-directory (expand-file-name "~/.cache/emacs/"))
 
 ;; Font Familly
-(set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 150)
+(set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
+
+;; 256 colors support for fbterm.
+(when (string-equal (getenv "TERM") "fbterm")
+  (load "term/xterm")
+  (defun terminal-init-fbterm ()
+    "Terminal initialization function for linux fbterm."
+    (unless (terminal-coding-system)
+      (set-terminal-coding-system 'utf-8-unix))
+
+    ;; It can't really display underlines.
+    (tty-no-underline)
+
+    (ignore-errors (when gpm-mouse-mode (require 't-mouse) (gpm-mouse-enable)))
+
+    (xterm-register-default-colors xterm-standard-colors))
+  (terminal-init-fbterm))
+
 
 ;; UI CONFIGURATION
 (setq inhibit-startup-message t
@@ -52,7 +46,6 @@
 (tooltip-mode -1);Disable the tooltip
 
 (fset 'yes-or-no-p 'y-or-n-p) ;; y or n
-
 (defvar custom-tab-width 4 "the width of a tab character")
 
 ;; Good Settings
@@ -61,7 +54,7 @@
  scroll-step 1
  scroll-preserve-screen-position 'always
  scroll-conservatively 1000
- package-native-compile t
+ package-native-compile nil
  next-line-add-newlines t
  load-prefer-newer t
  require-final-newline t
@@ -69,12 +62,10 @@
  switch-to-buffer-obey-display-actions nil
  list-matching-lines-default-context-lines 3
  sentence-end-double-space t
- compilation-scroll-output t ;; ?
+ compilation-scroll-output t
  set-mark-command-repeat-pop t
  backward-delete-char-untabify-method 'hungry
- c-mode-indent-offset custom-tab-width
  )
-
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
 
@@ -108,50 +99,37 @@
 ;; Bookmarks
 (setq
  bookmark-save-flag t
- bookmark-default-file (expand-file-name "bookmarks" user-emacs-directory))
+ bookmark-default-file (expand-file-name "bookmarks/" user-emacs-directory))
 
-(load-user-file "org-mode.el")
-
-(defun disable-tabs () (setq indent-tabs-mode nil))
+(defun disable-tabs ()
+	(interactive)
+	(setq indent-tabs-mode nil))
 
 (defun enable-tabs  ()
-  ;;(local-set-key (kbd "TAB") 'tab-to-tab-stop)
-  (local-set-key (kbd "TAB") 'indent-for-tab-command)
-  (setq indent-tabs-mode t)
-  (setq tab-width custom-tab-width))
+	;;(local-set-key (kbd "TAB") 'tab-to-tab-stop)
+	(interactive)
+	(local-set-key (kbd "TAB") 'indent-for-tab-command)
+	(setq indent-tabs-mode t)
+	(setq tab-width custom-tab-width))
 
 
 (add-hook 'prog-mode-hook 'enable-tabs)
 
+;; Isearch
+(setq
+ isearch-lazy-count t
+ lazy-count-prefix-format "(%s/%s) "
+ lazy-count-suffix-format nil
+ )
+
 (use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1))
+	:ensure t
+	:init (doom-modeline-mode 1))
 
 ;; Common Lisp
 (setq inferior-lisp-program "clisp")
 
 (global-completion-preview-mode 1)
-
-(use-package simpc-mode
-	:load-path "/home/caspeer/.emacs.d/"
-	)
-(add-to-list 'auto-mode-alist '("\\.[hc]\\(pp\\)?\\'" . simpc-mode))
-;;(add-hook 'simpc-mode-hook 'subword-mode)
-
-(use-package projectile
-	:init
-	(projectile-mode t)
-	:config
-	:bind (
-		   ("C-x p p" . 'projectile-switch-project)
-		   ("C-x p b" . 'projectile-switch-to-buffer)
-		   ("C-x p g" . 'projectile-grep)
-		   ("C-x p k" . 'projectile-kill-buffers)
-		   ("C-x p o" . 'projectile-switch-open-project)
-
-
-		   )
-	)
 
 (use-package whitespace
 			 :bind ("C-c t w" . whitespace-mode)
@@ -159,14 +137,12 @@
 			 (setq whitespace-line-column nil
 				   whitespace-display-mappings '((space-mark 32 [183] [46])
 												 (newline-mark 10 [9166 10])
-												 (tab-mark 9 [9654 9] [92 9])))
+												 (tab-mark 9 [187 9] [92 9])))
 			 :config
-			 (set-face-attribute 'whitespace-space       nil :foreground "#666666" :background nil)
-			 (set-face-attribute 'whitespace-newline     nil :foreground "#666666" :background nil)
-			 (set-face-attribute 'whitespace-indentation nil :foreground "#666666" :background nil)
-			 (setq whitespace-style '(face tabs spaces trailing space-before-tab newline indentation empty space-after-tab space-mark tab-mark))
-			 :diminish whitespace-mode)
+			 (setq whitespace-style '(face tabs spaces trailing space-before-tab newline indentation empty space-after-tab space-mark tab-mark)))
 
+
+;;TODO(caspeer): bind more functions from this useful package
 (use-package expand-region
 	:bind
 	("C-=" . 'er/expand-region)
@@ -174,42 +150,44 @@
 
 (use-package winner
 			 :init
-			 (setq winner-dont-bind-my-keys t)
 			 (winner-mode 1)
 			 :bind (("C-c u" . winner-undo)
 					("C-c r" . winner-redo))
 			 )
 
-
 ;; Hooks
 (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
+
+(defface font-lock-note-face
+	'((t :foreground "green" :weight bold))
+	"Face for my special keywords in font-lock."
+	)
+
+(defvar font-lock-note-face 'font-lock-note-face
+	"My note face variable"
+	)
+(defface my-font-lock-warning-face
+	'((t :foreground "red" :weight bold))
+	"Face for my special keywords in font-lock."
+	)
+
+(defvar my-font-lock-warning-face 'my-font-lock-warning-face
+	"My warning face variable"
+	)
 (add-hook 'prog-mode-hook
 		  (lambda ()
 			(font-lock-add-keywords nil
-									'(("\\<\\(FIX\\|FIXME\\|TODO\\|BUG\\|HACK\\):" 1 font-lock-warning-face t)))))
-
-;; vterm
-(use-package vterm
-			 :commands vterm
-			 :config
-			 (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
-			 ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
-			 (setq vterm-max-scrollback 10000))
-
-(use-package eldoc-box)
-(eldoc-box-hover-mode t)
-
-
-(use-package embark
-
-	)
+									'(
+									  ("\\<\\(FIX\\|TODO\\|BUG\\)" 1 my-font-lock-warning-face prepend)
+									  ("\\<\\(NOTE\\|HACK\\)" 1 font-lock-note-face prepend)
+									  ))))
 
 (use-package prescient
 	:ensure t
 	:config
 	(prescient-persist-mode)
 	)
-
 
 (use-package multiple-cursors
 	:ensure t
@@ -231,11 +209,10 @@
 			 (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
 (use-package recentf
-	:ensure nil
 	:config
 	(setq recentf-max-menu-items 20
 		  recentf-max-saved-items 100
-		  recentf-keep '(file-remote-p file-readable-p file-exists-p)
+		  recentf-keep '(file-readable-p file-exists-p)
 		  )
 	(recentf-mode t)
 	:bind ("C-c f r" . 'recentf)
@@ -257,9 +234,9 @@
 				 ("/ l" . 'dired-mark-symlinks)
 				 ("/ s" . 'dired-mark-subdir-files)
 				 ("/ t" . 'dired-toggle-marks)
-
+				 ("c" . 'dired-do-copy)
+				 ("C" . 'dired-do-compress-to)
 				 )
-
 	:custom ((dired-listing-switches "-aghlt ")) ;;--group-directories-first
 	:config
 	(setq
@@ -271,45 +248,34 @@
 ;;  Registers
 (setq register-preview-delay 0)
 
-;; Projects
-(use-package projectile
-	:config
-	(setq
-	 projectile-indexing-method 'alien
-	 projectile-enable-caching t
-	 projectile-require-project-root t
-	 )
-	)
-
-;; kbd macros
+;; KBD MACROS
 (define-prefix-command 'caspeer/kbd-macros)
 (global-set-key (kbd "C-c m") 'caspeer/kbd-macros)
 
-(defalias 'change-inner-parens
-	(kmacro "C-a C-c j ( C-M-SPC C-d ("))
-(global-set-key (kbd "C-c m(") 'change-inner-parens)
-
-(defalias 'delete-rvalue
-   (kmacro "C-a C-c j = C-f C-k"))
-(global-set-key (kbd "C-c m=") 'delete-rvalue)
-
-
 ;; mini-buffer completion
 (selectrum-mode +1)
-	(setq completion-styles '(orderless)
-		  selectrum-prescient-enable-filtering nil
-		  )
+	;; (setq completion-styles '(orderless)
+	;; 	  selectrum-prescient-enable-filtering nil
+	;; 	  )
 (selectrum-prescient-mode)
 
 ;; HIPPIE
 (global-set-key [remap dabbrev-expand] 'hippie-expand)
+(setq hippie-expand-try-functions-list '(try-complete-file-name-partially
+                                         try-complete-file-name
+		                                 try-expand-dabbrev
+		                                 try-expand-all-abbrevs
+		                                 try-expand-list try-expand-line
+		                                 try-expand-dabbrev-from-kill
+		                                 try-expand-dabbrev-all-buffers
+		                                 try-complete-lisp-symbol-partially
+		                                 try-complete-lisp-symbol))
+
 (setq hippie-expand-verbose nil)
 (setf completion-styles '(basic flex))
-;;(global-completion-preview-mode 1)
-
 
 (use-package flyspell-mode
-	:hook (org-mode . flyspell-mode)
+	:hook ((org-mode . markdown-mode) . flyspell-mode)
 	:bind
 	(:map flyspell-mode
 		  ("C-," . 'flyspell-goto-next-error)
@@ -319,7 +285,6 @@
 		  ("C-M-#" . 'ispell-complete-word)
 		  )
 	)
-
 
 ;; Snippets
 (use-package yasnippet-snippets
@@ -333,31 +298,70 @@
 	:hook ((text-mode
 			prog-mode
 			conf-mode
-			snippet-mode) . yas-minor-mode-on)
+			snippet-mode) . yas-minor-mode-on )
 	)
 
+(defmacro git-source (user repo &optional branch releases tags)
+  "Expand into a list of Elfeed feed entries for GitHub repo."
+  (let* ((base-url (format "https://github.com/%s/%s" user repo))
+         (feeds
+          (list
+           (if branch
+               (format "%s/commits/%s.atom" base-url branch)
+             (format "%s/commits.atom" base-url))))
+         (feeds
+          (append feeds
+                  (when releases (list (format "%s/releases.atom" base-url)))
+                  (when tags     (list (format "%s/tags.atom" base-url))))))
+    ;; Return feed entries, each with tags like 'repo' and the repo name
+    `(list
+      ,@(mapcar (lambda (url)
+                  `(list ,url 'repo ',(intern repo)))
+                feeds))))
 
-(add-hook 'simpc-mode-hook
-			  (lambda ()
-				  (setq-local yas--major-mode 'c-mode)
-				  (yas-activate-extra-mode 'c-mode)))
 
-
-
-
-(use-package dot-mode
-	:ensure t
+(use-package elfeed
 	:config
-	(global-dot-mode 1)
+	(setq elfeed-search-filter "@1-months-ago +unread -junk -repo")
+	(setq elfeed-feeds '(
+						 ("https://www.computerenhance.com/feed" casey)
+						 ("https://nullprogram.com/feed/" blog null)
+						 ("https://blog.cryptographyengineering.com/feed/" blog)
+						 ("https://www.redblobgames.com/blog/posts.xml" blog)
+						 ("https://utcc.utoronto.ca/~cks/space/blog/?atom" blog dev)
+						 ("https://lemire.me/blog/feed/" dev blog)
+						 ("https://danluu.com/atom.xml" dev blog)
+						 ("https://eli.thegreenplace.net/feeds/all.atom.xml" blog dev)
+						 ("https://fabiensanglard.net/rss.xml" blog dev)
+						 ("https://flak.tedunangst.com/rss" dev blog)
+						 ("https://nrk.neocities.org/rss.xml" blog dev)
+						 ("https://www.smbc-comics.com/comic/rss" comic)
+						 ("https://xkcd.com/atom.xml" comic)
+						 ;; Youtube
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyvk_lo0codsbB8oWL6xUBA" al-sabeel)
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrqM0Ym_NbK1fqeQG2VIohg" tsoding)
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJXa3_WNNmIpewOtCHf3B0g" laurie )
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" beneater)
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCW6MNdOsqv2E9AjQkv9we7A" pwnf)
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9J9u3apteD0EuFjzRpt71w" wookash-pod)
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCi8C7TNs2ohrc6hnRQ5Sn2w" programmer-are-also-humans)
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9-y-6csu5WGm29I7JiwpnA" computerphile)
+						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUyeluBRhGPCW4rPe_UvBZQ" prime)
+						 ;; Repos
+						 ))
+	(setq elfeed-feeds (append elfeed-feeds (git-source "tsoding" "nob.h")))
 	)
 
-(use-package android-mode
-	:config
-	(setq
-	 android-mode-avd "my_avd"
-	 android-mode-sdk-dir "/home/caspeer/android"
-	 )
-	)
+(add-hook 'elfeed-new-entry-hook
+          (elfeed-make-tagger :entry-link "youtube\\.com/shorts"
+                              :add 'junk
+                              :remove 'unread))
+
+(add-hook 'elfeed-new-entry-hook
+          (elfeed-make-tagger :feed-url "youtube\\.com"
+                              :add '(video youtube)))
+
+(global-set-key (kbd "C-c o") 'elfeed)
 
 (use-package move-dup
 	:bind (("M-p"   . move-dup-move-lines-up)
@@ -377,13 +381,9 @@
 	)
 
 (global-set-key (kbd "C-x c") 'compile)
-
-(global-set-key (kbd "C-c j") 'jump-char-forward)
-(global-set-key (kbd "C-c J") 'jump-char-backward)
-
-
-
-(add-hook 'simpc-mode-hook
+(global-set-key (kbd "M-m") 'recompile)
+(setq c-basic-offset custom-tab-width)
+(add-hook 'c-mode-hook
 		  (lambda ()
 			  (set (make-local-variable 'compile-command)
 				   (cond
@@ -410,7 +410,7 @@
 (global-set-key (kbd "C-c e r"	) 'eval-region)
 (global-set-key (kbd "C-c e e"	) 'eval-expression)
 (global-set-key (kbd "C-c e b"	) 'eval-buffer)
-(global-set-key (kbd "C-c SPC"	) 'async-shell-command)
+(global-set-key (kbd "C-c a"	) 'async-shell-command)
 ;(global-set-key (kbd "C-c m"	) 'multi-occur-in-matching-buffers)
 (global-set-key (kbd "C-x k"	) 'kill-current-buffer)
 (global-set-key (kbd "M-u") 'upcase-dwim)
@@ -445,7 +445,6 @@
 
 
 (global-set-key (kbd "C-x |") 'toggle-window-split)
-(global-set-key (kbd "C-c w i") 'imenu)
 
 (global-set-key (kbd "C-c f o") 'ff-find-other-file)
 
@@ -484,56 +483,39 @@
 			   (kill-backward-chars 1))
 			 ad-do-it))
 
-(use-package rfc-mode)
-(use-package python-mode
-	:ensure t
-	:hook (
-		   ('python-mode . 'flycheck-mode)
-		   )
+(use-package haskell-mode
 	:config
+	(disable-tabs)
 	(setq
-	 python-shell-interpreter "ipython3"
-
+	 haskell-indent-spaces 4
 	 )
 	)
-(use-package pet
+
+(use-package typst-ts-mode
+	:vc (:url "https://codeberg.org/meow_king/typst-ts-mode.git"))
+
+(setq
+ treesit-language-source-alist '(
+								 (typst "https://github.com/uben0/tree-sitter-typst")
+								 )
+ )
+
+(use-package envrc
 	:ensure t
+	:when (executable-find "direnv")
+	:bind-keymap ("C-c e v" . envrc-command-map)
+	:hook (after-init . envrc-global-mode))
+
+(setq envrc-mode-line-function #'envrc-mode-line-format)
+
+(use-package ediff
 	:config
-	(add-hook 'python-mode-hook 'pet-mode -10)
+	(setq ediff-split-window-function 'split-window-horizontally
+		  ediff-window-setup-function 'ediff-setup-windows-plain)
 	)
-
-;;(use-package treesit-auto
-;;			 :config
-;;			 (treesit-auto-add-to-auto-mode-alist 'all)
-;;			 (setq
-;;			   treesit-auto-install-all t)
-;;			 )
-
-;;(setq treesit-language-source-alist
-;;	  '((bash "https://github.com/tree-sitter/tree-sitter-bash")
-;;		(cmake "https://github.com/uyha/tree-sitter-cmake")
-;;		(css "https://xgithub.com/tree-sitter/tree-sitter-css")
-;;		(elisp "https://github.com/Wilfred/tree-sitter-elisp")
-;;		(go "https://github.com/tree-sitter/tree-sitter-go")
-;;		(html "https://github.com/tree-sitter/tree-sitter-html")
-;;		(c "https://github.com/tree-sitter/tree-sitter-c")
-;;		(python "https://github.com/tree-sitter/tree-sitter-python")
-;;		(lua "https://github.com/tree-sitter-grammars/tree-sitter-lua")
-;;		(gas "https://github.com/sirius94/tree-sitter-gas")
-;;		(ada "https://github.com/briot/tree-sitter-ada")
-;;		)
-;;	  )
-;;(setq	treesit-font-lock-level 4)
-;; (setq major-mode-remap-alist
-;; 	  '(
-;; 		(asm-mode . gas-ts-mode)
-;; 		)
-;; 	  )
-
 
 (setq display-buffer-alist
 	  '(
-
 		("\\*undo-tree\\*"
 		 (display-buffer-in-direction)
 		 (direction . right)
@@ -556,11 +538,4 @@
 			   "Discard all themes before loading new."
 			   (mapc #'disable-theme custom-enabled-themes))
 
-(load-theme 'kanagawa-wave)
-
-;; (set-face-background 'default "#111")
-;;(set-face-background 'isearch "#ff0")
-;;(set-face-foreground 'isearch "#000")
-;; (set-face-background 'lazy-highlight "#990")
-;; (set-face-foreground 'lazy-highlight "#000")
-;;(set-face-foreground 'font-lock-comment-face "#fc0")
+(load-theme 'modus-operandi-tinted)
