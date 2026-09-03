@@ -2,9 +2,17 @@
 
 (setq
  package-archives '(("melpa" . "http://melpa.org/packages/")
-					("gnu"   . "https://elpa.gnu.org/packages/"))
+					("gnu"   . "https://elpa.gnu.org/packages/")
+					("nongnu" . "https://elpa.nongnu.org/nongnu/")
+					)
  )
 
+(defun load-local-file (file)
+	(load-file (concat "~/.emacs.d/" file))
+	)
+
+(load-local-file "org-mode.el")
+(load-local-file "org-roam.el")
 
 (package-initialize)
 (unless package-archive-contents
@@ -15,25 +23,10 @@
 ;; Font Familly
 (set-face-attribute 'default nil :font "Iosevka Nerd Font" :height 130)
 
-;; 256 colors support for fbterm.
-(when (string-equal (getenv "TERM") "fbterm")
-  (load "term/xterm")
-  (defun terminal-init-fbterm ()
-    "Terminal initialization function for linux fbterm."
-    (unless (terminal-coding-system)
-      (set-terminal-coding-system 'utf-8-unix))
-
-    ;; It can't really display underlines.
-    (tty-no-underline)
-
-    (ignore-errors (when gpm-mouse-mode (require 't-mouse) (gpm-mouse-enable)))
-
-    (xterm-register-default-colors xterm-standard-colors))
-  (terminal-init-fbterm))
-
 
 ;; UI CONFIGURATION
 (setq inhibit-startup-message t
+	  inhibit-startup-echo-area-message t
 	  use-dialog-box nil
 	  warning-minimum-level :emergency
 	  display-line-numbers-type 'relative
@@ -54,7 +47,9 @@
  scroll-step 1
  scroll-preserve-screen-position 'always
  scroll-conservatively 1000
+ read-process-output-max (* 4 1024 1024)
  package-native-compile nil
+ kill-do-not-save-duplicates t
  next-line-add-newlines t
  load-prefer-newer t
  require-final-newline t
@@ -65,6 +60,8 @@
  compilation-scroll-output t
  set-mark-command-repeat-pop t
  backward-delete-char-untabify-method 'hungry
+ async-shell-command-display-buffer nil
+ help-window-select t
  )
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file)
@@ -74,6 +71,7 @@
 (save-place-mode 1)
 (delete-selection-mode 1)
 (global-auto-revert-mode 1)
+(setq auto-revert-verbose nil)
 (show-paren-mode 1)
 (column-number-mode)
 (electric-pair-mode 1)
@@ -99,7 +97,7 @@
 ;; Bookmarks
 (setq
  bookmark-save-flag t
- bookmark-default-file (expand-file-name "bookmarks/" user-emacs-directory))
+ bookmark-default-file (expand-file-name "bookmarks" user-emacs-directory))
 
 (defun disable-tabs ()
 	(interactive)
@@ -126,8 +124,56 @@
 	:ensure t
 	:init (doom-modeline-mode 1))
 
-;; Common Lisp
-(setq inferior-lisp-program "clisp")
+;; DASHBOARD
+(use-package dashboard
+	:ensure t
+	:after fortune
+	:config
+	(set-face-attribute 'dashboard-banner-logo-title nil :font "ETBembo" :foreground "#00ffff" :weight 'bold)
+	(dashboard-setup-startup-hook)
+	(setq
+	 dashboard-banner-logo-title "Bit*h i'm lagging"
+	 dashboard-startup-banner "~/Downloads/emacs.png"
+	 dashboard-set-navigator t
+	 dashboard-center-content t
+	 dashboard-items '((recents   . 5)
+                       (bookmarks . 5)
+                       (projects  . 5)
+                       (agenda    . 5))
+	 dashboard-icon-type 'nerd-icons
+	 dashboard-display-icons-p t
+	 dashboard-set-heading-icons t
+	 dashboard-set-file-icons t
+	 dashboard-icon-file-height 1
+	 dashboard-heading-icon-height 1
+	 dashboard-footer-icon "   "
+	 )
+	(setq dashboard-item-names '(("Recent Files:" . "Recently opened files:")
+								 ))
+	(setq dashboard-footer-messages
+          (list (with-temp-buffer
+			  (let ((fortune-buffer-name (current-buffer)))
+				  (fortune-in-buffer t nil)
+				  (buffer-string)))))
+	(dashboard-modify-heading-icons '((recents   . "nf-oct-sync")
+									  (bookmarks . "nf-oct-bookmark")
+									  (projects . "nf-oct-project_roadmap")
+									  (agenda . "nf-oct-repo")
+									  )
+									)
+
+	)
+
+(use-package page-break-lines
+	:ensure t)
+
+(use-package fortune
+	:init
+	(setq fortune-dir "/usr/share/fortune")
+	(setq fortune-file (expand-file-name "cookie" fortune-dir))
+)
+
+
 
 (global-completion-preview-mode 1)
 
@@ -144,6 +190,7 @@
 
 ;;TODO(caspeer): bind more functions from this useful package
 (use-package expand-region
+	:ensure t
 	:bind
 	("C-=" . 'er/expand-region)
 	)
@@ -183,11 +230,6 @@
 									  ("\\<\\(NOTE\\|HACK\\)" 1 font-lock-note-face prepend)
 									  ))))
 
-(use-package prescient
-	:ensure t
-	:config
-	(prescient-persist-mode)
-	)
 
 (use-package multiple-cursors
 	:ensure t
@@ -220,10 +262,12 @@
 
 ;; Global HOOKS
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
+(add-hook 'prolog-mode-hook #'flymake-swi-prolog-setup-backend)
+
 
 ;; Dired ------------------------
 (use-package dired
-	:hook ('dired-mode-hook 'auto-revert-mode)
+	:hook (dired-mode-hook . auto-revert-mode)
 	:bind (:map  dired-mode-map
 				 ("-" . 'dired-up-directory)
 				 ("1" . 'dired-do-shell-command)
@@ -236,6 +280,7 @@
 				 ("/ t" . 'dired-toggle-marks)
 				 ("c" . 'dired-do-copy)
 				 ("C" . 'dired-do-compress-to)
+				 ("J" . 'caspeer/dired-do-gf2)
 				 )
 	:custom ((dired-listing-switches "-aghlt ")) ;;--group-directories-first
 	:config
@@ -244,6 +289,29 @@
 	 dired-kill-when-opening-new-dired-buffer t
 	 )
 	)
+(defun my-dired-create-if-not-exists (orig-fun &rest args)
+	"Advice for `dired' to create the directory if it doesn't exist."
+	(let ((dir (car args)))
+		(when (and (stringp dir)
+				   (not (file-directory-p dir))
+				   (y-or-n-p (format "Directory %s does not exist. Create it? " dir)))
+			(make-directory dir t)))
+	(apply orig-fun args))
+
+(advice-add 'dired :around #'my-dired-create-if-not-exists)
+
+(use-package dired-recent
+	:ensure t
+	:init
+	(dired-recent-mode 1)
+	)
+
+(defun my-alternate-buffer ()
+	"Switch to the most recent buffer, mimicking C-x b RET."
+	(interactive)
+	(switch-to-buffer (other-buffer (current-buffer) t)))
+
+(global-set-key (kbd "M-<tab>") #'my-alternate-buffer)
 
 ;;  Registers
 (setq register-preview-delay 0)
@@ -252,30 +320,21 @@
 (define-prefix-command 'caspeer/kbd-macros)
 (global-set-key (kbd "C-c m") 'caspeer/kbd-macros)
 
-;; mini-buffer completion
-(selectrum-mode +1)
-	;; (setq completion-styles '(orderless)
-	;; 	  selectrum-prescient-enable-filtering nil
-	;; 	  )
-(selectrum-prescient-mode)
-
-;; HIPPIE
+; HIPPIE
 (global-set-key [remap dabbrev-expand] 'hippie-expand)
 (setq hippie-expand-try-functions-list '(try-complete-file-name-partially
-                                         try-complete-file-name
-		                                 try-expand-dabbrev
-		                                 try-expand-all-abbrevs
-		                                 try-expand-list try-expand-line
-		                                 try-expand-dabbrev-from-kill
-		                                 try-expand-dabbrev-all-buffers
-		                                 try-complete-lisp-symbol-partially
-		                                 try-complete-lisp-symbol))
+										 try-complete-file-name
+										 try-expand-dabbrev
+										 try-expand-all-abbrevs
+										 try-expand-list try-expand-line
+										 try-expand-dabbrev-from-kill
+										 try-expand-dabbrev-all-buffers
+										 try-complete-lisp-symbol-partially
+										 try-complete-lisp-symbol))
 
 (setq hippie-expand-verbose nil)
-(setf completion-styles '(basic flex))
 
 (use-package flyspell-mode
-	:hook ((org-mode . markdown-mode) . flyspell-mode)
 	:bind
 	(:map flyspell-mode
 		  ("C-," . 'flyspell-goto-next-error)
@@ -302,25 +361,26 @@
 	)
 
 (defmacro git-source (user repo &optional branch releases tags)
-  "Expand into a list of Elfeed feed entries for GitHub repo."
-  (let* ((base-url (format "https://github.com/%s/%s" user repo))
-         (feeds
-          (list
-           (if branch
-               (format "%s/commits/%s.atom" base-url branch)
-             (format "%s/commits.atom" base-url))))
-         (feeds
-          (append feeds
-                  (when releases (list (format "%s/releases.atom" base-url)))
-                  (when tags     (list (format "%s/tags.atom" base-url))))))
-    ;; Return feed entries, each with tags like 'repo' and the repo name
-    `(list
-      ,@(mapcar (lambda (url)
-                  `(list ,url 'repo ',(intern repo)))
-                feeds))))
+	"Expand into a list of Elfeed feed entries for GitHub repo."
+	(let* ((base-url (format "https://github.com/%s/%s" user repo))
+		   (feeds
+			(list
+			 (if branch
+					 (format "%s/commits/%s.atom" base-url branch)
+				 (format "%s/commits.atom" base-url))))
+		   (feeds
+			(append feeds
+					(when releases (list (format "%s/releases.atom" base-url)))
+					(when tags	 (list (format "%s/tags.atom" base-url))))))
+		;; Return feed entries, each with tags like 'repo' and the repo name
+		`(list
+		  ,@(mapcar (lambda (url)
+						`(list ,url 'repo ',(intern repo)))
+					feeds))))
 
 
 (use-package elfeed
+	:ensure t
 	:config
 	(setq elfeed-search-filter "@1-months-ago +unread -junk -repo")
 	(setq elfeed-feeds '(
@@ -337,8 +397,8 @@
 						 ("https://nrk.neocities.org/rss.xml" blog dev)
 						 ("https://www.smbc-comics.com/comic/rss" comic)
 						 ("https://xkcd.com/atom.xml" comic)
+						 ("https://lobste.rs/rss" lobsters)
 						 ;; Youtube
-						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyvk_lo0codsbB8oWL6xUBA" al-sabeel)
 						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrqM0Ym_NbK1fqeQG2VIohg" tsoding)
 						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJXa3_WNNmIpewOtCHf3B0g" laurie )
 						 ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" beneater)
@@ -353,21 +413,164 @@
 	)
 
 (add-hook 'elfeed-new-entry-hook
-          (elfeed-make-tagger :entry-link "youtube\\.com/shorts"
-                              :add 'junk
-                              :remove 'unread))
+		  (elfeed-make-tagger :entry-link "youtube\\.com/shorts"
+							  :add 'junk
+							  :remove 'unread))
 
 (add-hook 'elfeed-new-entry-hook
-          (elfeed-make-tagger :feed-url "youtube\\.com"
-                              :add '(video youtube)))
+		  (elfeed-make-tagger :feed-url "youtube\\.com"
+							  :add '(video youtube)))
 
 (global-set-key (kbd "C-c o") 'elfeed)
+
+(use-package eglot
+	:ensure t
+	:config
+	;; Register BasedPyright for Python
+	(add-to-list 'eglot-server-programs
+				 '((python-mode python-ts-mode)
+				   "basedpyright-langserver" "--stdio")))
+
+
+(use-package corfu
+	:ensure t
+	:config
+	(setq corfu-popupinfo-delay 0.1)
+	(add-hook 'sly-mrepl-mode-hook #'corfu-mode)
+	(corfu-auto t)
+	:custom
+    ;; auto popup
+	(corfu-popupinfo-mode)
+	(corfu-auto-prefix 4)
+	(corfu-auto-delay 0.2)
+	(corfu-cycle t)                 ;; cycle candidates
+	(corfu-preselect-first nil)     ;; don't preselect automatically
+	(corfu-quit-at-boundary t)
+	(corfu-quit-no-match t)
+	(corfu-echo-documentation t)
+	)
+
+(use-package kind-icon
+	:ensure t
+	:after corfu
+	:custom
+	(kind-icon-default-face 'corfu-default) ;; make background match corfu
+	:config
+	(add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+
+;; Add extensions
+(use-package cape
+	:ensure t
+	:init
+	(add-hook 'completion-at-point-functions #'cape-dabbrev)
+	(add-hook 'completion-at-point-functions #'cape-file)
+	(add-hook 'completion-at-point-functions #'cape-elisp-block)
+	)
+
+;; vertico
+(use-package vertico
+	:ensure t
+	:custom
+	;; (vertico-scroll-margin 0) ;; Different scroll margin
+	(vertico-count 10) ;; Show more candidates
+	(vertico-resize t) ;; Grow and shrink the Vertico minibuffer
+	(vertico-cycle t) ;; Enable cycling for `vertico-next/previous'
+	:init
+	(vertico-mode))
+
+(use-package orderless
+	:custom
+	;; Configure a custom style dispatcher (see the Consult wiki)
+	;; (orderless-style-dispatchers '(+orderless-consult-dispatch orderless-affix-dispatch))
+	;; (orderless-component-separator #'orderless-escapable-split-on-space)
+	(completion-styles '(orderless basic))
+	(completion-category-overrides '((file (styles partial-completion))))
+	(completion-category-defaults nil) ;; Disable defaults, use our settings
+	(completion-pcm-leading-wildcard t)) ;; Emacs 31: partial-completion behaves like substring
+
+(use-package consult
+	:ensure t
+	:bind (;; A recursive grep
+		   ("M-s M-g" . consult-grep)
+		   ;; Search for files names recursively
+		   ("M-s M-f" . consult-find)
+		   ;; Search through the outline (headings) of the file
+		   ("M-s M-o" . consult-outline)
+		   ;; Search the current buffer
+		   ("M-s M-l" . consult-line)
+		   ;; Switch to another buffer, or bookmarked file, or recently
+		   ;; opened file.
+		   ("C-x b" . consult-buffer)
+		   ("M-s M-m" . consult-mark)
+		   ("M-s M-b" . consult-bookmark)
+		   ("C-x p b" . consult-project-buffer))
+	)
+
+(use-package marginalia
+	:ensure t
+	:config
+	(marginalia-mode 1))
+
+;; PYTHON SETUP
+(use-package pyvenv
+	:ensure t
+	)
+
+(use-package pyvenv-auto
+	:ensure t)
+
+(add-hook 'python-ts-mode-hook
+          (lambda ()
+              (pyvenv-auto-run)))
+
+(use-package python
+	:ensure t
+	:hook (python-ts-mode . flymake-mode)
+	:mode (("\\.py\\'" . python-ts-mode))
+	)
+
+(use-package sly
+	:ensure t
+	:config
+	(setq inferior-lisp-program "sbcl")
+	)
 
 (use-package move-dup
 	:bind (("M-p"   . move-dup-move-lines-up)
            ("C-M-p" . move-dup-duplicate-up)
            ("M-n"   . move-dup-move-lines-down)
            ("C-M-n" . move-dup-duplicate-down)))
+
+(use-package flycheck
+	:ensure t
+	)
+;; Optional: ensure flycheck cycles, both when going backward and forward.
+;; Tries to handle arguments correctly.
+;; Since flycheck-previous-error is written in terms of flycheck-next-error,
+;; advising the latter is enough.
+(defun flycheck-next-error-loop-advice (orig-fun &optional n reset)
+										; (message "flycheck-next-error called with args %S %S" n reset)
+	(condition-case err
+			(apply orig-fun (list n reset))
+		((user-error)
+		 (let ((error-count (length flycheck-current-errors)))
+			 (if (and
+				  (> error-count 0)                   ; There are errors so we can cycle.
+				  (equal (error-message-string err) "No more Flycheck errors"))
+					 ;; We need to cycle.
+					 (let* ((req-n (if (numberp n) n 1)) ; Requested displacement.
+										; An universal argument is taken as reset, so shouldn't fail.
+							(curr-pos (if (> req-n 0) (- error-count 1) 0)) ; 0-indexed.
+							(next-pos (mod (+ curr-pos req-n) error-count))) ; next-pos must be 1-indexed
+										; (message "error-count %S; req-n %S; curr-pos %S; next-pos %S" error-count req-n curr-pos next-pos)
+										; orig-fun is flycheck-next-error (but without advise)
+										; Argument to flycheck-next-error must be 1-based.
+						 (apply orig-fun (list (+ 1 next-pos) 'reset)))
+				 (signal (car err) (cdr err)))))))
+
+(advice-add 'flycheck-next-error :around #'flycheck-next-error-loop-advice)
+
 
 (use-package undo-tree
 	:ensure t
@@ -380,9 +583,36 @@
 	 )
 	)
 
+(defun caspeer/dired-do-gf2 ()
+	"Run `gf2` on the file at point asynchronously.
+If the file is a Windows executable (.exe), run `gf2 --gdb FILE` so it can run using winedbg."
+	(interactive)
+	(let* ((file (expand-file-name (dired-get-file-for-visit)))
+           (cmd (if (string-suffix-p ".exe" file t)
+						(format "gf2 --gdb %s"
+								(shell-quote-argument file))
+					(format "gf2 %s"
+							(shell-quote-argument file)))))
+		(async-shell-command cmd)))
+
+(defun caspeer/save-and-recompile ()
+	(interactive)
+	(save-buffer)
+	(recompile))
+
 (global-set-key (kbd "C-x c") 'compile)
-(global-set-key (kbd "M-m") 'recompile)
+(global-set-key (kbd "M-m") 'caspeer/save-and-recompile)
 (setq c-basic-offset custom-tab-width)
+(setq cc-search-directories '(
+							  "."
+							  "/usr/include"
+							  "/usr/local/include/*"
+							  "/usr/x86_64-w64-mingw32/include/*"
+							  ))
+(c-set-offset 'substatement-open 0)
+(setq c-default-style '((c-mode . "bsd")
+                        (c++-mode . "bsd")
+                        (other . "gnu")))
 (add-hook 'c-mode-hook
 		  (lambda ()
 			  (set (make-local-variable 'compile-command)
@@ -410,7 +640,7 @@
 (global-set-key (kbd "C-c e r"	) 'eval-region)
 (global-set-key (kbd "C-c e e"	) 'eval-expression)
 (global-set-key (kbd "C-c e b"	) 'eval-buffer)
-(global-set-key (kbd "C-c a"	) 'async-shell-command)
+(global-set-key (kbd "C-c #"	) 'async-shell-command)
 ;(global-set-key (kbd "C-c m"	) 'multi-occur-in-matching-buffers)
 (global-set-key (kbd "C-x k"	) 'kill-current-buffer)
 (global-set-key (kbd "M-u") 'upcase-dwim)
@@ -483,30 +713,100 @@
 			   (kill-backward-chars 1))
 			 ad-do-it))
 
-(use-package haskell-mode
-	:config
-	(disable-tabs)
-	(setq
-	 haskell-indent-spaces 4
-	 )
-	)
+(defadvice align-regexp (around align-regexp-with-spaces activate)
+	(let ((indent-tabs-mode nil))
+		ad-do-it))
+
 
 (use-package typst-ts-mode
 	:vc (:url "https://codeberg.org/meow_king/typst-ts-mode.git"))
+
+(use-package mu4e
+	:ensure nil
+	:commands (mu4e mu4e-update-mail-and-index)
+	:config
+
+	;; Maildir
+	(setq mu4e-maildir (expand-file-name "~/mail")
+
+		  ;; Fetch and index mail
+		  mu4e-get-mail-command "mbsync -a"
+
+		  ;; Check for new mail every 5 minutes
+		  mu4e-update-interval 300
+
+		  ;; Don't ask before quitting
+		  mu4e-confirm-quit nil
+
+		  ;; Display
+		  mu4e-view-show-images t
+		  mu4e-view-show-addresses t
+
+		  mu4e-maildir-shortcuts '(("/services/INBOX"     . ?s)
+								   ("/personal/INBOX"     . ?p)
+								   ("/services/[Gmail]/Sent Mail" . ?S)
+								   ("/personal/[Gmail]/Sent Mail" . ?P))
+		  ;; Context behavior
+		  mu4e-context-policy 'pick-first
+		  mu4e-compose-context-policy 'ask)
+
+	(setq mu4e-contexts
+		  (list
+
+		   ;; ─────────────────────────────
+		   ;; Services
+		   ;; ─────────────────────────────
+
+		   (make-mu4e-context
+			:name "Services"
+			:match-func
+			(lambda (msg)
+				(when msg
+					(or
+					 (mu4e-message-contact-field-matches
+					  msg :to "samidgallabi45@gmail.com")
+					 (mu4e-message-contact-field-matches
+					  msg :from "samidgallabi45@gmail.com"))))
+			:vars '((user-mail-address . "samidgallabi45@gmail.com")
+					(user-full-name . "Sami Dj")
+					(mu4e-sent-folder . "/services/[Gmail]/Sent Mail")
+					(mu4e-drafts-folder . "/services/[Gmail]/Drafts")
+					(mu4e-trash-folder . "/services/[Gmail]/Trash")))
+
+		   ;; ─────────────────────────────
+		   ;; Personal
+		   ;; ─────────────────────────────
+
+		   (make-mu4e-context
+			:name "Personal"
+			:match-func
+			(lambda (msg)
+				(when msg
+					(or
+					 (mu4e-message-contact-field-matches
+					  msg :to "personal@gmail.com")
+					 (mu4e-message-contact-field-matches
+					  msg :from "personal@gmail.com"))))
+			:vars '((user-mail-address . "personal@gmail.com")
+					(user-full-name . "Your Name")
+					(mu4e-sent-folder . "/personal/[Gmail]/Sent Mail")
+					(mu4e-drafts-folder . "/personal/[Gmail]/Drafts")
+					(mu4e-trash-folder . "/personal/[Gmail]/Trash"))))))
+
+(use-package anki-editor
+	:ensure t
+	:vc (:url "https://github.com/anki-editor/anki-editor"
+			  :rev :newest)
+	:bind (
+		   ("C-c t a" . anki-editor-ui)
+		   )
+	)
 
 (setq
  treesit-language-source-alist '(
 								 (typst "https://github.com/uben0/tree-sitter-typst")
 								 )
  )
-
-(use-package envrc
-	:ensure t
-	:when (executable-find "direnv")
-	:bind-keymap ("C-c e v" . envrc-command-map)
-	:hook (after-init . envrc-global-mode))
-
-(setq envrc-mode-line-function #'envrc-mode-line-format)
 
 (use-package ediff
 	:config
@@ -538,4 +838,16 @@
 			   "Discard all themes before loading new."
 			   (mapc #'disable-theme custom-enabled-themes))
 
-(load-theme 'modus-operandi-tinted)
+(defun caspeer/eval-arithmatic-region (beg end)
+	""
+	(interactive "r")
+	(let ((exp (calc-eval (buffer-substring-no-properties beg end))))
+		(delete-region beg end)
+		(insert exp)
+		)
+	)
+
+(put 'narrow-to-region 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(load-theme 'dracula)
