@@ -26,8 +26,6 @@ setopt INC_APPEND_HISTORY    # Write each command to history as it’s entered
 setopt EXTENDED_HISTORY
 
 # Search history with up/down arrows
-bindkey '^[[A' history-search-backward   # Up arrow
-bindkey '^[[B' history-search-forward    # Down arrow
 bindkey "^R" history-incremental-search-backward
 
 ### Aliases
@@ -36,16 +34,21 @@ alias v="nvim"
 alias py="python3"
 alias vimp="cd ~/.config/nvim;nvim ."
 alias rn="ranger"
-#alias z="zoxide"
 alias em="emacsclient --create-frame"
 alias ls="ls --color=always"
 alias mv="mv -v"
 alias cp="cp -v"
 alias rm="rm -v"
-alias cdp="cd $ROOT"
 
+# ssh-agent
+#if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+#    ssh-agent -t 1h > "$XDG_RUNTIME_DIR/ssh-agent.env"
+#fi
+#if [ ! -f "$SSH_AUTH_SOCK" ]; then
+#    source "$XDG_RUNTIME_DIR/ssh-agent.env" >/dev/null
+#fi
 
-export TERM=alacritty
+#export TERM=nothing
 ## FZF
 export FZF_DEFAUL_OPTS="--height=100 --color=bg+:#343d46,gutter:-1,pointer:#ff3c3c,info:#0dbc79,hl+:#23d18b,--preview 'bat {}'"
 export FZF_DEFAULT_COMMAND="find . -path '*/\.*' -type d -prune -o -type f -print -o -type l -print 2> /dev/null | sed s/^..//"
@@ -54,15 +57,8 @@ export FZF_CTRL_T_COMMAND="fd -H -L --type f --type l --color never --search-pat
 export FZF_CTRL_T_OPTS="--height 100 --preview 'bat --color=always --line-range :50 {}'"
 export FZF_ALT_C_OPTS="--height 70 --preview 'tree -C {} | head -50'"
 ## ENV
-export EDITOR="nvim"
-export ANDROID_HOME=$HOME/android
-export ANDROID_SDK_ROOT=$ANDROID_HOME
+export EDITOR="emacs"
 export PATH="$PATH:$HOME/.local/bin:$HOME/.local/scripts:$HOME/.local/bin:$HOME/software/nvim-linux64/bin:$HOME/node_modules/hexo-cli/bin"
-export PATH=$PATH:$ANDROID_HOME/emulator
-export PATH=$PATH:$ANDROID_HOME/tools
-export PATH=$PATH:$ANDROID_HOME/tools/bin
-export PATH=$PATH:$ANDROID_HOME/platform-tools
-export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin
 
 # Minimal Zsh prompt
 PROMPT='%F{blue}%n%f@%F{gray}%m%f %F{yellow}[%1~] %F{red}-> %F{white}'
@@ -87,49 +83,3 @@ autoload -Uz compinit
 compinit
 # End of lines added by compinstall
 
-# =============================================================================
-autoload -U is-at-least
-_z_cd() {
-    cd "$@" || return "$?"
-
-    if [ "$_ZO_ECHO" = "1" ]; then
-        echo "$PWD"
-    fi
-}
-
-z() {
-    if [ "$#" -eq 0 ]; then
-        _z_cd ~
-    elif [ "$#" -eq 1 ] && [ "$1" = '-' ]; then
-        if [ -n "$OLDPWD" ]; then
-            _z_cd "$OLDPWD"
-        else
-            echo 'zoxide: $OLDPWD is not set'
-            return 1
-        fi
-    else
-        _zoxide_result="$(zoxide query -- "$@")" && _z_cd "$_zoxide_result"
-    fi
-}
-
-zi() {
-    _zoxide_result="$(zoxide query -i -- "$@")" && _z_cd "$_zoxide_result"
-}
-
-
-alias za='zoxide add'
-
-alias zq='zoxide query'
-alias zqi='zoxide query -i'
-
-alias zr='zoxide remove'
-zri() {
-    _zoxide_result="$(zoxide query -i -- "$@")" && zoxide remove "$_zoxide_result"
-}
-
-
-_zoxide_hook() {
-    zoxide add "$(pwd -L)"
-}
-
-chpwd_functions=(${chpwd_functions[@]} "_zoxide_hook")
