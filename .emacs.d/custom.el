@@ -10,7 +10,15 @@
  '(bison-electric-open-brace-v nil)
  '(column-number-mode t)
  '(custom-safe-themes
-   '("7e5e90061f3931f4b29b977a61a742ab45b7b01049eea4a1fb6fdc042cb842b2"
+   '("ded0cd1b37a2633465fd30dca9b7aa9b5e57dca6d3337bf80d54c9ebd241e755"
+	 "f2f07719428af0572740e5f962677173777b439349ec6abc0db2db8d4ce3de41"
+	 "866c42bcd430df48c64e86694fa62737fc0eb2bfbbe6f68d7d95dd9f05d63bb3"
+	 "b6760747b166ba414f6e41cf3c2e4c46fc681378540ef00273af8fbbed3fa0a0"
+	 "64940177202abecafcf78a47789165cce202e276b10c390e8aecaad41dfa6b4c"
+	 "0223215a464167d93b9cfef9b1cdf9b0768ab660f33b3068b647f7b12aa453a0"
+	 "ba98102679e7ed71a0b79c9a490328370b6b20537e04730bf0028bdd8a2418a9"
+	 "0da9f48243b77c83719c569efd88a7e47c1d8a3f2887838408745d2d52fad8a8"
+	 "7e5e90061f3931f4b29b977a61a742ab45b7b01049eea4a1fb6fdc042cb842b2"
 	 "a40703f9d1adb7ee1500d3c33ac4d62144675505ae7fe98b18a5d9ff325ee369"
 	 "d49b785b8be354474424778a3c299adc0f850e2625677a6ab16550131443ee93"
 	 "f700bc979515153bef7a52ca46a62c0aa519950cc06d539df4f3d38828944a2c"
@@ -138,33 +146,38 @@
 				 "Black" :html-background "Transparent" :html-scale
 				 1.0 :matchers ("begin" "$1" "$" "$$" "\\(" "\\[")))
  '(package-selected-packages
-   '(0xc ace-pinyin ada-mode almost-mono-themes ample-theme android-env
-		 android-mode base16-theme bison-mode chatgpt-shell
-		 command-log-mode csv-mode cyberpunk-theme dakrone-light-theme
-		 darktooth-theme dart-mode dash dired-open dired-single direnv
-		 doom-modeline doom-themes dracula-theme ef-themes eglot
-		 elfeed elpy emacsql emacsql-sqlite embark envrc
-		 eterm-256color evil evil-collection evil-surround
+   '(0xc abyss-theme ace-pinyin ada-mode all-the-icons almost-mono-themes
+		 ample-theme android-env android-mode anki-editor
+		 astro-ts-mode base16-theme bison-mode calc-at-point cape
+		 catppuccin-theme chatgpt-shell clips-mode command-log-mode
+		 consult corfu csv-mode cyberpunk-theme dakrone-light-theme
+		 darktooth-theme dart-mode dash dashboard dired-open
+		 dired-recent dired-single direnv doom-modeline doom-themes
+		 dracula-theme eglot elfeed elpy emacsql emacsql-sqlite embark
+		 envrc eterm-256color evil evil-collection evil-surround
 		 expand-region "f" f flutter flx-ido flycheck
-		 flycheck-posframe flycheck-pyflakes flymake-lua fzf general
-		 glass-tty-theme gnuplot gnuplot-mode go-imenu go-mode
-		 gruber-darker-theme haskell-mode haskell-snippets
-		 haskell-tab-indent icomplete-vertical ivy-prescient
-		 java-snippets kanagawa-theme kanagawa-themes lex lispy
-		 lua-mode magit markdown-mode mindre-theme minimal-theme
-		 mips-mode modus-themes move-dup move-text mu4e
-		 multiple-cursors nasm-mode nim-mode no-literring orderless
-		 org-ref org-roam-ui ox-rfc paredit pet php-mode pomodoro
-		 prescient rainbow-identifiers rainbow-mode rfc-mode rg
-		 selectrum selectrum-prescient shift-number sly stumpwm-mode
+		 flycheck-posframe flycheck-pyflakes flymake-lua flyspell-mode
+		 fzf general glass-tty-theme gnuplot gnuplot-mode go-imenu
+		 go-mode gruber-darker-theme haskell-mode haskell-snippets
+		 haskell-tab-indent icomplete-vertical ini-mode ivy-prescient
+		 java-snippets kanagawa-theme kanagawa-themes kaolin-themes
+		 kind-icon lex lispy lua-mode magit marginalia markdown-mode
+		 mindre-theme minimal-theme mips-mode modus-themes move-dup
+		 move-text mu4e multiple-cursors nasm-mode nim-mode
+		 no-literring olivetti orderless org-modern org-ref org-roam
+		 org-roam-ui org2blog ox-gfm ox-pandoc ox-rfc page-break-lines
+		 paredit peacock-theme pet php-mode pomodoro pyvenv
+		 pyvenv-auto qml-mode rainbow-identifiers rainbow-mode
+		 rfc-mode rg shift-number sly stumpwm-mode sweeprolog
 		 tao-theme tomorrow-night-deepblue-theme treesit-auto tsx-mode
 		 tsx-modesas tuareg typescript-mode typst-preview
-		 typst-ts-mode undo-tree visible-mark visual-fill-column
-		 web-mode which-key writeroom-mode yaml-mode yasnippet
+		 typst-ts-mode undo-tree vertico visible-mark web-mode
+		 which-key writegood-mode writeroom-mode yaml-mode yasnippet
 		 yasnippet-capf yasnippet-snippets zig-mode zotxt))
  '(package-vc-selected-packages
    '((typst-ts-mode :url
 					"https://codeberg.org/meow_king/typst-ts-mode.git")))
+ '(warning-suppress-types '((initialization)))
  '(window-divider-mode t))
 
 (custom-set-faces
