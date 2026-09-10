@@ -1,6 +1,6 @@
 ;;Org-Roam
 
-(defcustom caspeer/org-roam-filter-entries '("notes" "journal")
+(defcustom caspeer/org-roam-filter-entries '("notes" "research")
 	"org-roam entries to filter with"
 	:type '(repeat string)
 	:group 'org-roam
@@ -41,13 +41,9 @@
 		)
 	)
 
-
-
-
 (use-package org-roam
 	:ensure t
 	:bind (
-		   ("C-c n r" . org-roam-node-random)
 		   ("C-c n f" . org-roam-node-find)
 		   ("C-c n e" . caspeer/org-roam-node-find-entry)
 		   ("C-c n t" . caspeer/org-roam-node-find-by-tag)
@@ -59,11 +55,7 @@
 				 ("C-c n a" . org-roam-aliase-add)
 				 ("C-c n i" . org-roam-node-insert)
 				 ("C-c n v" . #'org-roam-node-visit)
-				 ;; Dailies
-				 ;; ("C-c j" . org-roam-dailies-capture-today)
-				 ;; ("C-c d" . org-roam-dailies-goto-today)
 				 ))
-										;:bind-keymap
 	:custom
 	(org-roam-directory (file-truename "~/notes"))
 	(roam-completion-everywhere nil)
@@ -71,18 +63,12 @@
 	 '(
 	   ("n" "notes" plain "%?"
 		:target (file+head "${slug}.org"
-						   "#+title:\n#+date:%T"
+						   "#+title: ${slug} \n#+date:%T"
 						   )
 		:unnarrowed t
 		:unnarrowed-sections (1))
-	   ("i" "Inbox idea"
-		plain
-		"%?"
-		:target (file+head "INBOX.org"
-						   "#+title: Inbox\n")
-		:unnarrowed t)
-
-	   ))
+	   )
+	 )
 	;; Add more templates as needed
 
 	:config
@@ -105,8 +91,7 @@
 				   (window-width . 0.40)
 				   (window-height . fit-window-to-buffer)))
 	(org-roam-db-autosync-mode)
-	(setq org-roam-file-extensions '("org" "org_archive")
-		  org-roam-dailies-directory "journal/"
+	(setq org-roam-dailies-directory "journal/"
 		  org-roam-completion-everywhere t
 		  org-id-extra-files (org-roam-list-files)
 		  org-roam-dailies-capture-templates '(( "j" "journal bullet point " entry
@@ -129,3 +114,69 @@
 		  )
 	(require 'org-roam-protocol)	;; If using org-roam-protocol
 	)
+
+(use-package org-roam-ql
+	:after (org-roam)
+	:bind ((:map org-roam-mode-map
+				 ;; Have org-roam-ql's transient available in org-roam-mode buffers
+				 ("v" . org-roam-ql-buffer-dispatch)
+				 :map minibuffer-mode-map
+				 ;; Be able to add titles in queries while in minibuffer.
+				 ;; This is similar to `org-roam-node-insert', but adds
+				 ;; only title as a string.
+				 ("C-c n i" . org-roam-ql-insert-node-title))))
+
+(defun my/luhmann-tokenize (id)
+  "Split \"2a2a\" into (2 \"a\" 2 \"a\") for correct sorting/depth."
+  (let ((tokens '()) (i 0) (len (length id)))
+    (while (< i len)
+      (if (cl-digit-char-p (aref id i))
+          (let ((start i))
+            (while (and (< i len) (cl-digit-char-p (aref id i))) (setq i (1+ i)))
+            (push (string-to-number (substring id start i)) tokens))
+        (let ((start i))
+          (while (and (< i len) (not (cl-digit-char-p (aref id i)))) (setq i (1+ i)))
+          (push (substring id start i) tokens))))
+    (nreverse tokens)))
+
+(defun my/luhmann-token< (a b)
+  (cond
+   ((and (null a) (null b)) nil)
+   ((null a) t)
+   ((null b) nil)
+   (t (let ((x (car a)) (y (car b)))
+        (if (and (numberp x) (numberp y))
+            (cond ((< x y) t) ((> x y) nil) (t (my/luhmann-token< (cdr a) (cdr b))))
+          (cond ((string< x y) t) ((string> x y) nil) (t (my/luhmann-token< (cdr a) (cdr b)))))))))
+
+(defun my/luhmann-extract (title)
+  "Return (ID . REST-OF-TITLE) if TITLE starts with a Luhmann ID."
+  (when (string-match "\\`\\([0-9]+\\(?:[a-z]+[0-9]*\\)*\\)\\s-+\\(.*\\)\\'" title)
+    (cons (match-string 1 title) (match-string 2 title))))
+
+(defun my/org-roam-luhmann-tree ()
+	"Show all Luhmann-numbered org-roam nodes as an indented, linked tree."
+	(interactive)
+	(let* ((entries
+			(delq nil
+                  (mapcar (lambda (node)
+							  (let ((parsed (my/luhmann-extract (org-roam-node-title node))))
+								  (when parsed
+									  (list :id (car parsed)
+											:label (cdr parsed)
+											:node-id (org-roam-node-id node)))))
+                          (org-roam-node-list))))
+           (sorted (sort entries
+						 (lambda (a b)
+							 (my/luhmann-token< (my/luhmann-tokenize (plist-get a :id))
+												(my/luhmann-tokenize (plist-get b :id)))))))
+		(with-current-buffer (get-buffer-create "*Luhmann Tree*")
+			(erase-buffer)
+			(org-mode)
+			(dolist (e sorted)
+				(let* ((depth (length (my/luhmann-tokenize (plist-get e :id))))
+					   (indent (make-string (* 2 (1- depth)) ?\s)))
+					(insert (format "%s- %s [[id:%s][%s]]\n"
+									indent (plist-get e :id) (plist-get e :node-id) (plist-get e :label)))))
+			(goto-char (point-min))
+			(display-buffer (current-buffer)))))
